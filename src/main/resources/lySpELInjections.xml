@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<component name="LanguageInjectionConfiguration">
+    <!-- 注解 -->
+    <injection language="JAVA" injector-id="java">
+        <display-name>SpEL parameter plugin</display-name>
+        <prefix>interface A { public static </prefix>
+        <suffix>value;}</suffix>
+        <place><![CDATA[psiMethod().withName("typeStr").withParameters().definedInClass("kim.nzxy.spel.SpELField")]]></place>
+    </injection>
+</component>

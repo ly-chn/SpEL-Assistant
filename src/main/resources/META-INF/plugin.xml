@@ -1,0 +1,27 @@
+<idea-plugin>
+    <id>kim.nzxy.spel</id>
+
+    <name>SpELParameter</name>
+
+    <vendor email="lyun.chn@gmail.com" url="https://nzxy.kim">NzXy</vendor>
+
+    <description><![CDATA[
+    SpEL support for parameters.
+    Use @Language for SpEL support
+  ]]></description>
+
+    <depends>com.intellij.modules.platform</depends>
+    <depends>com.intellij.javaee.el</depends>
+    <depends>com.intellij.spring.mvc</depends>
+    <depends>org.intellij.intelliLang</depends>
+
+    <extensions defaultExtensionNs="com.intellij">
+        <spring.el.contexts implementation="kim.nzxy.spel.LySpringElContextsExtension" order="first" id="SpEl-ly-chn"/>
+        <languageInjectionContributor implementationClass="kim.nzxy.spel.LySpELExtensionLanguageInject"
+                                      order="first" language="JAVA"/>
+    </extensions>
+
+    <extensions defaultExtensionNs="org.intellij.intelliLang">
+        <injectionConfig config="lySpELInjections.xml"/>
+    </extensions>
+</idea-plugin>
