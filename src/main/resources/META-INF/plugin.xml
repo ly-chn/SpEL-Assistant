@@ -1,13 +1,13 @@
 <idea-plugin>
     <id>kim.nzxy.spel</id>
 
-    <name>SpELParameter</name>
+    <name>SpEL Extension</name>
 
     <vendor email="lyun.chn@gmail.com" url="https://nzxy.kim">NzXy</vendor>
 
     <description><![CDATA[
-    SpEL support for parameters.
-    Use @Language for SpEL support
+    SpEL support for parameters. and custom annotations
+    see detail for github
   ]]></description>
 
     <depends>com.intellij.modules.platform</depends>
