@@ -39,9 +39,7 @@
    }
    ```
 
-2. 安装此插件
-
-   IDEA中直接安装即可
+2. [安装此插件](https://plugins.jetbrains.com/plugin/23337-spel-extension/)
 
 ## 说明
 
