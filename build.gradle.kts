@@ -7,6 +7,18 @@ plugins {
 group = "kim.nzxy"
 version = "1.0.0"
 
+tasks {
+    buildSearchableOptions{
+        enabled = false
+    }
+    compileJava {
+        options.encoding = "UTF-8"
+    }
+    compileTestJava{
+        options.encoding = "UTF-8"
+    }
+}
+
 repositories {
     mavenCentral()
 }
@@ -19,7 +31,8 @@ intellij {
         listOf(
             "com.intellij.javaee.el",
             "com.intellij.spring.mvc",
-            "org.intellij.intelliLang"
+            "org.intellij.intelliLang",
+            "com.intellij.java"
         )
     )
 }

@@ -6,11 +6,18 @@
     <vendor email="lyun.chn@gmail.com" url="https://nzxy.kim">NzXy</vendor>
 
     <description><![CDATA[
-    SpEL support for parameters. and custom annotations
-    see detail for github
-  ]]></description>
+        Custom SpEL variables support in your annotations, use it with <a
+                href="https://github.com/ly-chn/spel-extension">SpEL Extension</a>.
+        You can define variables for:
+        <ul>
+            <li>method result</li>
+            <li>method parameters</li>
+            <li>custom fields with generics</li>
+        </ul>
+        ]]></description>
 
     <depends>com.intellij.modules.platform</depends>
+    <depends>com.intellij.modules.java</depends>
     <depends>com.intellij.javaee.el</depends>
     <depends>com.intellij.spring.mvc</depends>
     <depends>org.intellij.intelliLang</depends>
