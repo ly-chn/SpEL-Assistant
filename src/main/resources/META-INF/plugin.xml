@@ -21,13 +21,17 @@
     <depends>com.intellij.javaee.el</depends>
     <depends>com.intellij.spring.mvc</depends>
     <depends>org.intellij.intelliLang</depends>
-
+    <depends>org.jetbrains.plugins.yaml</depends>
     <extensions defaultExtensionNs="com.intellij">
-        <spring.el.contexts implementation="kim.nzxy.spel.LySpringElContextsExtension" order="first" id="SpEl-ly-chn"/>
+        <spring.el.contexts implementation="kim.nzxy.spel.LySpringElContextsExtension" order="first" id="SpEL-ly-chn"/>
         <languageInjectionContributor implementationClass="kim.nzxy.spel.LySpELExtensionLanguageInject"
                                       order="first" language="JAVA"/>
+        <completion.contributor language="yaml"
+                                order="first"
+                                implementationClass="kim.nzxy.spel.yaml.LyYamlKeyCompletionContributor"/>
+<!--        <psi.referenceContributor language="yaml"
+                                  implementation="kim.nzxy.spel.yaml.LyYamlReferenceContributor"/>-->
     </extensions>
-
     <extensions defaultExtensionNs="org.intellij.intelliLang">
         <injectionConfig config="lySpELInjections.xml"/>
     </extensions>
