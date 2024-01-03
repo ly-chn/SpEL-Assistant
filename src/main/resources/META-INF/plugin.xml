@@ -29,8 +29,8 @@
         <completion.contributor language="yaml"
                                 order="first"
                                 implementationClass="kim.nzxy.spel.yaml.LyYamlKeyCompletionContributor"/>
-<!--        <psi.referenceContributor language="yaml"
-                                  implementation="kim.nzxy.spel.yaml.LyYamlReferenceContributor"/>-->
+        <psi.referenceContributor language="yaml"
+                                  implementation="kim.nzxy.spel.yaml.LyYamlReferenceContributor"/>
     </extensions>
     <extensions defaultExtensionNs="org.intellij.intelliLang">
         <injectionConfig config="lySpELInjections.xml"/>
