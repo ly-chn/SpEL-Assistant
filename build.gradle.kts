@@ -24,7 +24,7 @@ repositories {
 }
 
 intellij {
-    version.set("2021.3")
+    version.set("2023.3")
     type.set("IU") // Target IDE Platform
 
     plugins.set(

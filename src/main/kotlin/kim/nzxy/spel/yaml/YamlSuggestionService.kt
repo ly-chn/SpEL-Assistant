@@ -13,20 +13,15 @@ import com.intellij.psi.search.searches.ClassInheritorsSearch
 import com.intellij.psi.util.CachedValueProvider
 import com.intellij.psi.util.CachedValuesManager
 import com.intellij.psi.util.PsiTypesUtil
+import kim.nzxy.spel.SpELConst
 
 
 @Service
 class YamlSuggestionService {
     private val ignoredQualifiedPrefix = arrayOf("jdk.", "java.")
+
     // todo: for library and source tracker
     private val regularTracking = ModificationTracker { System.currentTimeMillis() / 1000 }
-    private val spELTypeMap = mapOf(
-        ".fields" to "Map<String, String>",
-        ".method.result" to "Boolean",
-        ".method.parameters" to "Boolean",
-        ".method.resultName" to "String",
-        ".method.parametersPrefix" to "String[]",
-    )
 
     companion object {
         fun getInstance(): YamlSuggestionService {
@@ -44,8 +39,8 @@ class YamlSuggestionService {
                 if (ignoredQualifiedPrefix.any { qualifiedName.startsWith(it) }) return@forEach
                 anno.methods.forEach {
                     if (it.returnType == stringType) {
-                        spELTypeMap.forEach { (suffix, type) ->
-                            res["$qualifiedName.${it.name}$suffix"] = type
+                        SpELConst.spELDocMap.forEach { (suffix, doc) ->
+                            res["$qualifiedName.${it.name}$suffix"] = doc.type
                         }
                     }
                 }
@@ -69,7 +64,7 @@ class YamlSuggestionService {
         return keys
     }
 
-    private fun getCls(project: Project, name: String): PsiClass {
+    fun getCls(project: Project, name: String): PsiClass {
         return JavaPsiFacade.getInstance(project)
             .findClass(name, ProjectScope.getLibrariesScope(project))!!
     }
