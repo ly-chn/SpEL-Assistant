@@ -4,6 +4,7 @@ import com.intellij.lang.jvm.annotation.JvmAnnotationAttribute
 import com.intellij.lang.jvm.annotation.JvmAnnotationClassValue
 import com.intellij.lang.jvm.annotation.JvmAnnotationConstantValue
 import com.intellij.openapi.diagnostic.thisLogger
+import com.intellij.openapi.module.ModuleUtilCore
 import com.intellij.openapi.project.Project
 import com.intellij.psi.*
 import com.intellij.psi.impl.source.PsiClassReferenceType

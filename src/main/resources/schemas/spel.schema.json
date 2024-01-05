@@ -1,0 +1,68 @@
+{
+  "version": "0.7",
+  "definitions": {
+    "Method": {
+      "type": "object",
+      "title": "Method",
+      "description": "Define method result and parameters",
+      "additionalProperties": false,
+      "properties": {
+        "result": {
+          "type": "boolean",
+          "description": "Support method result type, named that #resultName",
+          "default": false
+        },
+        "resultName":{
+          "type": "string",
+          "pattern": "[a-zA-Z]+",
+          "description": "Variable name of method result",
+          "default": "result"
+        },
+        "parameters": {
+          "type": "boolean",
+          "description": "if method, support parameter list as SpEL variables",
+          "default": false
+        },
+        "parametersPrefix": {
+          "type": "array",
+          "description": "If provided, parameter name will be alias as `${prefix}${parameterIndex}`, such as p0, p1, a0, a1",
+          "additionalItems": {
+            "type": "string"
+          },
+          "default": [["p", "a"]]
+        }
+      }
+    },
+    "Fields": {
+      "type": "object",
+      "patternProperties": {
+        "^.*$": {
+          "type": "string",
+          "x-intellij-language-injection": {
+            "language": "JAVA",
+            "prefix": "interface A { public static ",
+            "suffix": " value = null;}"
+          }
+        }
+      },
+      "additionalProperties": false,
+      "examples": ["a"]
+    }
+  },
+  "type": "object",
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "patternProperties": {
+    "^.*$": {
+      "type": "object",
+      "properties": {
+        "fields": {
+          "$ref": "#/definitions/Fields"
+        },
+        "method": {
+          "$ref": "#/definitions/Method"
+        }
+      }
+    }
+  },
+  "additionalProperties": false
+}

@@ -1,6 +1,5 @@
 package kim.nzxy.spel
 
-import kim.nzxy.spel.yaml.YamlDocInfo
 
 @Suppress("ConstPropertyName")
 object SpELConst {
@@ -31,27 +30,4 @@ object SpELConst {
     const val spELWithAttrFieldDefault = "value"
 
     val spELInjectTarget = arrayOf(methodAnno, fieldAnno, spELWithAnno)
-
-    val spELDocMap = mapOf(
-        ".fields" to YamlDocInfo(
-            "Map<String, String>", "java.util.Map<String, String>", "",
-            "Custom SpEL variables mapping. For instance, `.fields.root=com.example.RootObject`"
-        ),
-        ".method.result" to YamlDocInfo(
-            "Boolean", "Boolean", "false",
-            "Support method result type, named that method.resultName"
-        ),
-        ".method.parameters" to YamlDocInfo(
-            "Boolean", "Boolean", "false",
-            "if method, support parameter list as SpEL variables"
-        ),
-        ".method.resultName" to YamlDocInfo(
-            "String", "String", "result",
-            "Variable name of method result"
-        ),
-        ".method.parametersPrefix" to YamlDocInfo(
-            "String[]", "String[]", "[]",
-            "if provided, parameter name will be prefixed"
-        ),
-    )
 }
