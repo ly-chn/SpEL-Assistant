@@ -21,6 +21,9 @@ class LySpringElContextsExtension : SpringElContextsExtension() {
 
     override fun getContextVariables(contextElement: PsiElement): MutableCollection<out PsiVariable> {
         val collector = SmartList<PsiVariable>()
+        val module = ModuleUtilCore.findModuleForPsiElement(contextElement)
+        val service = YamlConfigService.getInstance()
+        service.getAllMetaConfigKeys(module!!)
         try {
             direct(contextElement, collector)
             if (collector.isNotEmpty()) {

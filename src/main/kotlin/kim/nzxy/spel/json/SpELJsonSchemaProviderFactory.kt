@@ -11,7 +11,7 @@ import com.jetbrains.jsonSchema.extension.SchemaType
  * @since 2024/1/5 11:13
  */
 class SpELJsonSchemaProviderFactory : JsonSchemaProviderFactory {
-    private val themeSchemaPath = "/schemes/spel.schema.json"
+    private val themeSchemaPath = "/schemas/spel.schema.json"
 
     override fun getProviders(project: Project): List<JsonSchemaFileProvider> {
         return listOf<JsonSchemaFileProvider>(object : JsonSchemaFileProvider {

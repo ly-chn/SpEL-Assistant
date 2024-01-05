@@ -8,9 +8,10 @@ import com.intellij.json.psi.JsonProperty
 import com.intellij.json.psi.JsonReferenceExpression
 import com.intellij.json.psi.JsonStringLiteral
 import com.intellij.psi.PsiElement
-import com.intellij.psi.impl.source.codeStyle.CodeStyleManagerImpl
+import com.intellij.psi.PsiErrorElement
+import com.intellij.psi.codeStyle.CodeStyleManager
 import com.intellij.psi.impl.source.tree.LeafPsiElement
-import com.intellij.util.SmartList
+import com.intellij.psi.util.PsiTreeUtil
 
 /**
  * @author ly-chn
@@ -19,7 +20,7 @@ import com.intellij.util.SmartList
 class SpELJsonCompletionContributor : CompletionContributor() {
     override fun fillCompletionVariants(parameters: CompletionParameters, result: CompletionResultSet) {
         val position = parameters.position as? LeafPsiElement ?: return
-        if (parameters.originalFile !is JsonFile || ConfigJsonUtil.isSpELFilename(parameters.originalFile.name)) return
+        if (parameters.originalFile !is JsonFile || !ConfigJsonUtil.isSpELFilename(parameters.originalFile.name)) return
         if (parameters.completionType != CompletionType.BASIC) return
 
         val parent = position.parent
@@ -43,17 +44,15 @@ class SpELJsonCompletionContributor : CompletionContributor() {
         if (presentNamePart.isNotEmpty()) {
             return
         }
-
-        val lookupElements = SmartList<LookupElement>()
+        val existedKeys = property.parent.children.filter { it is JsonProperty && it != property }
+            .map { (it as JsonProperty).name }
         val service = JsonSuggestionService.getInstance()
         val configKeys = service.getAllMetaConfigKeys(element.project)
         for (configKey in configKeys) {
-            result.addElement(
-                LookupElementBuilder.create(configKey)
-                    .withInsertHandler(SpELInsertHandler)
-            )
+            if (!existedKeys.contains(configKey)) {
+                result.addElement(LookupElementBuilder.create(configKey).withInsertHandler(SpELInsertHandler))
+            }
         }
-        result.addAllElements(lookupElements)
     }
 
     private fun isPropertyKey(element: PsiElement): Boolean {
@@ -64,23 +63,29 @@ class SpELJsonCompletionContributor : CompletionContributor() {
         return true
     }
 
-    object SpELInsertHandler: InsertHandler<LookupElement>{
+    object SpELInsertHandler : InsertHandler<LookupElement> {
         override fun handleInsert(context: InsertionContext, item: LookupElement) {
-            context.document.deleteString(context.startOffset, context.tailOffset)
-            val quoted = """"${item.lookupString}": {
-                    |"method": {
-                    |"result": false,
-                    |"resultName": "result",
-                    |"parameters": false,
-                    |"parametersPrefix": ["p", "a"],
-                    |},
-                    |"fields": {
-                    |"demo": "java.util.Map<String, String>"
-                    |}},""".trimMargin()
-            context.document.insertString(context.startOffset, quoted)
+            val element = context.file.findElementAt(context.startOffset) ?: return
+            val literal = PsiTreeUtil.getParentOfType(element, JsonStringLiteral::class.java, false)
+            val range = PsiTreeUtil.getParentOfType(element, JsonStringLiteral::class.java, false)?.textRange
+                ?: element.textRange
+            var hasBody = false
+            if (literal != null) {
+                val next = PsiTreeUtil.nextLeaf(literal)
+                if (next != null && next !is PsiErrorElement) {
+                    hasBody = true
+                }
+            }
+            val quoted = if (hasBody) {
+                "\"${item.lookupString}\""
+            } else {
+                """"${item.lookupString}": {"method": {"result": false,"resultName": "result","parameters": false,
+                    "parametersPrefix": ["p", "a"],},"fields": {"demo": "java.util.Map<String, String>"}},"""
+            }
+            context.document.replaceString(range.startOffset, range.endOffset, quoted)
             context.commitDocument()
-            CodeStyleManagerImpl.getInstance(context.project)
-                .reformatText(context.file, context.startOffset, context.startOffset + quoted.length)
+            CodeStyleManager.getInstance(context.project)
+                .reformatText(context.file, range.startOffset, range.startOffset + quoted.length)
         }
     }
 }

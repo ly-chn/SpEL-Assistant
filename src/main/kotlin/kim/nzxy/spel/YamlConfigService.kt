@@ -1,31 +1,26 @@
 package kim.nzxy.spel
 
 import com.intellij.microservices.config.MetaConfigKey
-import com.intellij.microservices.config.MetaConfigKeyManager
 import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.components.Service
-import com.intellij.openapi.diagnostic.thisLogger
 import com.intellij.openapi.fileEditor.impl.LoadTextUtil
 import com.intellij.openapi.module.Module
 import com.intellij.openapi.module.ModuleUtilCore
-import com.intellij.openapi.progress.ProcessCanceledException
-import com.intellij.openapi.project.IndexNotReadyException
 import com.intellij.openapi.roots.ModuleRootManager
-import com.intellij.openapi.roots.OrderEnumerator
-import com.intellij.openapi.vfs.LocalFileSystem
 import com.intellij.openapi.vfs.VFileProperty
 import com.intellij.openapi.vfs.VirtualFile
+import com.intellij.psi.JavaPsiFacade
 import com.intellij.psi.PsiFile
+import com.intellij.psi.search.FilenameIndex
+import com.intellij.psi.search.GlobalSearchScope
+import com.intellij.psi.search.PackageScope
 import com.intellij.psi.util.CachedValueProvider
 import com.intellij.psi.util.CachedValuesManager
 import com.intellij.psi.util.PsiModificationTracker
-import com.intellij.spring.boot.application.metadata.SpringBootApplicationMetaConfigKeyManagerImpl
-import com.intellij.spring.model.utils.SpringCommonUtils
-import com.intellij.util.ArrayUtil
-import com.intellij.util.Processors
 import com.intellij.util.SmartList
 import com.intellij.util.containers.ContainerUtil
-import org.yaml.snakeyaml.Yaml
+import kim.nzxy.spel.json.ConfigJsonUtil
+import kim.nzxy.spel.json.SpELInfo
 
 /**
  * @author ly-chn
@@ -41,7 +36,7 @@ class YamlConfigService {
 
 
     fun getAllMetaConfigKeys(module: Module): List<MetaConfigKey> {
-        // val fromLibraries= getLibrariesConfigKeys(module)
+        val fromLibraries = getLibrariesConfigKeys(module)
         val localKeys = getLocalMetaConfigKeys(module)
         // return ContainerUtil.concat(fromLibraries, localKeys)
         return SmartList()
@@ -66,159 +61,61 @@ class YamlConfigService {
         return null
     }
 
-    private fun getLocalMetaConfigKeys(localModule: Module?): List<MetaConfigKey> {
+    private fun getLocalMetaConfigKeys(localModule: Module?): HashMap<String, SpELInfo> {
         return CachedValuesManager.getManager(localModule!!.project).getCachedValue(localModule) {
             val allModules = LinkedHashSet<Module>()
             ModuleUtilCore.getDependencies(localModule, allModules)
-            val unitTestMode =
-                ApplicationManager.getApplication().isUnitTestMode
             val dependencies =
                 SmartList<Any>(PsiModificationTracker.MODIFICATION_COUNT)
-            val allKeys: MutableList<MetaConfigKey> = ArrayList()
+            val allKeys = HashMap<String, SpELInfo>()
             for (module in allModules) {
                 val localJsonFile = findMetadataFileForModule(module)
                 if (localJsonFile != null) {
-                    val keys: List<MetaConfigKey> = ArrayList()
-                    val collect = Processors.cancelableCollectProcessor(keys)
-
-                    try {
-                        // val parser = SpringBootConfigurationMetadataParser(module, localJsonFile)
-                        // parser.processKeys(module, collect)
-                        parseConfig(localJsonFile)
-                    } catch (var11: IndexNotReadyException) {
-                        throw var11
-                    } catch (var11: ProcessCanceledException) {
-                        throw var11
-                    } catch (e: Throwable) {
-                        thisLogger().warn("Error parsing " + localJsonFile.path, e)
-                    }
-
-                    allKeys.addAll(keys)
-                    ContainerUtil.addIfNotNull(dependencies,localJsonFile)
+                    parseConfig(localJsonFile, allKeys)
+                    ContainerUtil.addIfNotNull(dependencies, localJsonFile)
                 }
             }
             return@getCachedValue CachedValueProvider.Result.create(
-                allKeys,
-                *ArrayUtil.toObjectArray(dependencies)
+                allKeys, dependencies
             )
         }
     }
 
-    private fun parseConfig(file: VirtualFile) {
+    private fun parseConfig(file: VirtualFile, collect: HashMap<String, SpELInfo>) {
         val text = LoadTextUtil.loadText(file)
-        val yaml = Yaml()
-        println()
+        val info = ConfigJsonUtil.parseSpELInfo(text) ?: return
+        collect.putAll(info)
     }
 
-/*    private fun getLocalMetaConfigKeys(localModule: Module?): List<MetaConfigKey> {
-        return CachedValuesManager.getManager(localModule!!.project).getCachedValue(localModule) {
-            val allModules = LinkedHashSet<Module>()
-            ModuleUtilCore.getDependencies(localModule, allModules)
-            val unitTestMode =
-                ApplicationManager.getApplication().isUnitTestMode
-            val dependencies =
-                SmartList(PsiModificationTracker.MODIFICATION_COUNT)
-            val allKeys: MutableList<MetaConfigKey> = ArrayList()
-            for (module in allModules) {
-                val moduleOrderEnumerator = OrderEnumerator.orderEntries(module)
-                // moduleOrderEnumerator.source
-                val localJsonFile = MetaConfigKeyManager.findLocalMetadataJsonFile(
-                    module,
-                    "spring-configuration-metadata.json",
-                    unitTestMode
-                )
-                if (localJsonFile != null) {
-                    val keys: List<MetaConfigKey> = ArrayList()
-                    val collect = Processors.cancelableCollectProcessor(keys)
-
-                    try {
-                        val parser =
-                            SpringBootConfigurationMetadataParser(module, localJsonFile)
-                        parser.processKeys(module, collect)
-                    } catch (var11: IndexNotReadyException) {
-                        throw var11
-                    } catch (var11: ProcessCanceledException) {
-                        throw var11
-                    } catch (var12: Throwable) {
-                        SpringBootApplicationMetaConfigKeyManagerImpl.LOG.warn(
-                            "Error parsing " + localJsonFile.path,
-                            var12
-                        )
-                    }
-
-                    allKeys.addAll(keys)
-                    ContainerUtil.addIfNotNull(
-                        dependencies,
-                        LocalFileSystem.getInstance().findFileByIoFile(localJsonFile)
-                    )
-                }
-            }
-            return@getCachedValue CachedValueProvider.Result.create(
-                allKeys,
-                *ArrayUtil.toObjectArray(dependencies)
-            )
-        }
-    }*/
-
-/*    private fun getLibrariesConfigKeys(module: Module): MutableList<MetaConfigKey> {
+    private fun getLibrariesConfigKeys(module: Module): HashMap<String, SpELInfo> {
         return CachedValuesManager.getManager(module.project).getCachedValue(module) {
-            val metaInfConfigFiles =
-                SpringCommonUtils.findConfigFilesInMetaInf(
-                    module, true, "spring-configuration-metadata.json",
-                    PsiFile::class.java
-                )
-            val allKeys: MutableList<MetaConfigKey> = ArrayList()
-            val var3: Iterator<*> = metaInfConfigFiles.iterator()
 
-            while (var3.hasNext()) {
-                val configMetadataFile = var3.next() as PsiFile
-                val keys = getConfigKeysForFile(module, configMetadataFile)
-                allKeys.addAll(keys)
+            val metaInfConfigFiles = findConfigFiles(module)
+            val allKeys = HashMap<String, SpELInfo>()
+
+            for (psiFile in metaInfConfigFiles) {
+                // todo: parse file
             }
+
             CachedValueProvider.Result.create(
                 allKeys, PsiModificationTracker.MODIFICATION_COUNT
             )
         }
-    }*/
-    /*    private fun getLibrariesConfigKeys(module: Module): MutableList<MetaConfigKey> {
-            return CachedValuesManager.getManager(module.project).getCachedValue(module) {
-                val metaInfConfigFiles =
-                    SpringCommonUtils.findConfigFilesInMetaInf(
-                        module, true, "spring-configuration-metadata.json",
-                        PsiFile::class.java
-                    )
-                val allKeys: MutableList<MetaConfigKey> = ArrayList()
-                val var3: Iterator<*> = metaInfConfigFiles.iterator()
+    }
 
-                while (var3.hasNext()) {
-                    val configMetadataFile = var3.next() as PsiFile
-                    val keys =
-                        getConfigKeysForFile(module, configMetadataFile)
-                    allKeys.addAll(keys)
-                }
-                CachedValueProvider.Result.create(
-                    allKeys,PsiModificationTracker.MODIFICATION_COUNT
-                )
-            }
+    private fun findConfigFiles(module: Module): List<PsiFile> {
+        var scope = GlobalSearchScope.moduleRuntimeScope(module, false)
+        val metaInfPackage = JavaPsiFacade.getInstance(module.project).findPackage("META-INF")
+        if (metaInfPackage == null) {
+            return emptyList()
+        } else {
+            val packageScope = PackageScope.packageScope(metaInfPackage, false)
+            scope = scope.intersectWith(packageScope)
         }
-
-        private fun getConfigKeysForFile(module: Module, jsonFile: PsiFile): List<MetaConfigKey> {
-            val keys: List<MetaConfigKey> = ArrayList()
-            val collect = Processors.cancelableCollectProcessor(keys)
-
-            try {
-                val parser = SpringBootConfigurationMetadataParser(jsonFile)
-                parser.processKeys(module, collect)
-            } catch (var5: IndexNotReadyException) {
-                throw var5
-            } catch (var5: ProcessCanceledException) {
-                throw var5
-            } catch (var6: Throwable) {
-                thisLogger().warn("Error parsing " + jsonFile.virtualFile.path, var6)
-            }
-
-            return keys
+        val configFiles = FilenameIndex.getFilesByName(module.project, "spel-extension.json", scope)
+        if (configFiles.isEmpty()) {
+            return emptyList()
         }
-
-*/
+        return ContainerUtil.findAll(configFiles, PsiFile::class.java)
+    }
 }
