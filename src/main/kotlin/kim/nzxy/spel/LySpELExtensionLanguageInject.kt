@@ -27,6 +27,6 @@ class LySpELExtensionLanguageInject : LanguageInjectionContributor {
                 }
             }
         }
-        return null;
+        return null
     }
 }

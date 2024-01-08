@@ -33,6 +33,9 @@
                          groupName="SpEL JSON Inspection"
                          enabledByDefault="true" level="WARNING"
                          implementationClass="kim.nzxy.spel.json.SpELJsonKeyInspection"/>
+        <fileType name="spel-extension.json" fieldName="INSTANCE"
+                  fileNames="spel-extension.json"
+                  implementationClass="kim.nzxy.spel.json.SpELExtensionFileType"/>
     </extensions>
     <extensions defaultExtensionNs="JavaScript.JsonSchema">
         <ProviderFactory implementation="kim.nzxy.spel.json.SpELJsonSchemaProviderFactory"/>

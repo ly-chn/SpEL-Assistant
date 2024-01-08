@@ -18,7 +18,7 @@ class SpELJsonSchemaProviderFactory : JsonSchemaProviderFactory {
             override fun isAvailable(file: VirtualFile) = ConfigJsonUtil.isSpELFilename(file.name)
 
             // todo: msg bundle
-            override fun getName() = "SpEL Extension"
+            override fun getName() = "spel-extension.json"
 
             override fun getSchemaFile() = JsonSchemaProviderFactory.getResourceFile(javaClass, themeSchemaPath)
 

@@ -6,6 +6,7 @@ import com.intellij.lang.jvm.annotation.JvmAnnotationConstantValue
 import com.intellij.openapi.diagnostic.thisLogger
 import com.intellij.openapi.module.ModuleUtilCore
 import com.intellij.openapi.project.Project
+import com.intellij.openapi.project.ProjectCoreUtil
 import com.intellij.psi.*
 import com.intellij.psi.impl.source.PsiClassReferenceType
 import com.intellij.psi.impl.source.PsiTypeElementImpl
@@ -22,7 +23,7 @@ class LySpringElContextsExtension : SpringElContextsExtension() {
     override fun getContextVariables(contextElement: PsiElement): MutableCollection<out PsiVariable> {
         val collector = SmartList<PsiVariable>()
         val module = ModuleUtilCore.findModuleForPsiElement(contextElement)
-        val service = YamlConfigService.getInstance()
+        val service = SpELConfigService.getInstance()
         service.getAllMetaConfigKeys(module!!)
         try {
             direct(contextElement, collector)

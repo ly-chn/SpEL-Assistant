@@ -1,11 +1,12 @@
 package kim.nzxy.spel
 
-import com.intellij.microservices.config.MetaConfigKey
 import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.components.Service
 import com.intellij.openapi.fileEditor.impl.LoadTextUtil
 import com.intellij.openapi.module.Module
+import com.intellij.openapi.module.ModuleUtil
 import com.intellij.openapi.module.ModuleUtilCore
+import com.intellij.openapi.project.Project
 import com.intellij.openapi.roots.ModuleRootManager
 import com.intellij.openapi.vfs.VFileProperty
 import com.intellij.openapi.vfs.VirtualFile
@@ -27,18 +28,20 @@ import kim.nzxy.spel.json.SpELInfo
  * @since 2024/1/4 10:07
  */
 @Service
-class YamlConfigService {
+class SpELConfigService {
     companion object {
-        fun getInstance(): YamlConfigService {
-            return ApplicationManager.getApplication().getService(YamlConfigService::class.java)
+        fun getInstance(): SpELConfigService {
+            return ApplicationManager.getApplication().getService(SpELConfigService::class.java)
         }
     }
 
 
-    fun getAllMetaConfigKeys(module: Module): List<MetaConfigKey> {
-        val fromLibraries = getLibrariesConfigKeys(module)
-        val localKeys = getLocalMetaConfigKeys(module)
+    fun getAllMetaConfigKeys(module: Module): List<SpELInfo> {
+        // val fromLibraries = getLibrariesConfigKeys(project)
+        // val localKeys = getLocalMetaConfigKeys(project)
+
         // return ContainerUtil.concat(fromLibraries, localKeys)
+        val dependencyModuleNames = ModuleRootManager.getInstance(module).dependencyModuleNames
         return SmartList()
     }
 
@@ -63,6 +66,7 @@ class YamlConfigService {
 
     private fun getLocalMetaConfigKeys(localModule: Module?): HashMap<String, SpELInfo> {
         return CachedValuesManager.getManager(localModule!!.project).getCachedValue(localModule) {
+
             val allModules = LinkedHashSet<Module>()
             ModuleUtilCore.getDependencies(localModule, allModules)
             val dependencies =
@@ -84,6 +88,7 @@ class YamlConfigService {
     private fun parseConfig(file: VirtualFile, collect: HashMap<String, SpELInfo>) {
         val text = LoadTextUtil.loadText(file)
         val info = ConfigJsonUtil.parseSpELInfo(text) ?: return
+        println("parse info from file ${file.name}, value is: $info")
         collect.putAll(info)
     }
 
@@ -94,7 +99,7 @@ class YamlConfigService {
             val allKeys = HashMap<String, SpELInfo>()
 
             for (psiFile in metaInfConfigFiles) {
-                // todo: parse file
+                parseConfig(psiFile.virtualFile, allKeys)
             }
 
             CachedValueProvider.Result.create(
