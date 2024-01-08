@@ -28,6 +28,11 @@
         <spring.el.contexts implementation="kim.nzxy.spel.LySpringElContextsExtension" order="first" id="SpEL-ly-chn"/>
         <languageInjectionContributor implementationClass="kim.nzxy.spel.LySpELExtensionLanguageInject"
                                       order="first" language="JAVA"/>
+        <localInspection language="JSON" shortName="SpELJsonKey"
+                         displayName="SpEL JSON Inspection"
+                         groupName="SpEL JSON Inspection"
+                         enabledByDefault="true" level="WARNING"
+                         implementationClass="kim.nzxy.spel.json.SpELJsonKeyInspection"/>
     </extensions>
     <extensions defaultExtensionNs="JavaScript.JsonSchema">
         <ProviderFactory implementation="kim.nzxy.spel.json.SpELJsonSchemaProviderFactory"/>

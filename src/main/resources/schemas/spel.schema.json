@@ -29,6 +29,7 @@
           "additionalItems": {
             "type": "string"
           },
+          "uniqueItems": true,
           "default": [["p", "a"]]
         }
       }
