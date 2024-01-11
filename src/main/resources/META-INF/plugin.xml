@@ -21,8 +21,8 @@
     <depends>com.intellij.javaee.el</depends>
     <depends>com.intellij.spring.mvc</depends>
     <depends>org.intellij.intelliLang</depends>
-    <depends>JavaScript</depends>
-    <depends>org.jetbrains.kotlin</depends>
+    <depends optional="true" config-file="json-schema-provider.xml">JavaScript</depends>
+    <depends optional="true" config-file="kotlin-support.xml">org.jetbrains.kotlin</depends>
     <extensions defaultExtensionNs="com.intellij">
         <completion.contributor language="JSON" implementationClass="kim.nzxy.spel.json.SpELJsonCompletionContributor"/>
         <spring.el.contexts implementation="kim.nzxy.spel.LySpringElContextsExtension" order="first" id="SpEL-ly-chn"/>
@@ -36,9 +36,6 @@
         <fileType name="spel-extension.json" fieldName="INSTANCE"
                   fileNames="spel-extension.json"
                   implementationClass="kim.nzxy.spel.json.SpELExtensionFileType"/>
-    </extensions>
-    <extensions defaultExtensionNs="JavaScript.JsonSchema">
-        <ProviderFactory implementation="kim.nzxy.spel.json.SpELJsonSchemaProviderFactory"/>
     </extensions>
     <extensions defaultExtensionNs="org.intellij.intelliLang">
         <injectionConfig config="lySpELInjections.xml"/>

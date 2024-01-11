@@ -16,7 +16,7 @@ import com.intellij.psi.util.PsiTypesUtil
 
 @Service
 class JsonSuggestionService {
-    private val ignoredQualifiedPrefix = arrayOf("jdk.", "java.", "javax.", "jakarta.", "lombok.", "org.springframework")
+    private val ignoredQualifiedPrefix = arrayOf("jdk.", "java.", "javax.", "jakarta.", "lombok.", "org.springframework", "kotlin.")
 
     // todo: for library and source tracker
     private val regularTracking = ModificationTracker { System.currentTimeMillis() / 1000 }

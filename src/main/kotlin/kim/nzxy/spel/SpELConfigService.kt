@@ -66,10 +66,11 @@ class SpELConfigService {
         val anno = getContainingAnnotationEntry(context.toUElement())?.first ?: return null
         val qualifiedName = anno.qualifiedName ?: return null
         var attrName = PsiTreeUtil.getParentOfType(context, PsiNameValuePair::class.java)?.attributeName
-        if (attrName == null) {
+        if (attrName == null && PluginChecker.getInstance().kotlin()) {
             val valueArgument = PsiTreeUtil.getParentOfType(context, KtValueArgument::class.java) ?: return null
             attrName = valueArgument.getArgumentName()?.text ?: "value"
         }
+        attrName ?: return null
         return Pair(qualifiedName, attrName)
     }
 
@@ -132,7 +133,7 @@ class SpELConfigService {
 
     private fun findConfigFiles(project: Project): List<PsiFile> {
         val configFiles =
-            FilenameIndex.getFilesByName(project, ConfigJsonUtil.FILENAME, ProjectScope.getLibrariesScope(project))
+            FilenameIndex.getVirtualFilesByName(ConfigJsonUtil.FILENAME, ProjectScope.getLibrariesScope(project))
         if (configFiles.isEmpty()) {
             return emptyList()
         }
