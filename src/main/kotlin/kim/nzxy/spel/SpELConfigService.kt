@@ -21,6 +21,7 @@ import com.intellij.util.containers.ConcurrentFactoryMap
 import com.intellij.util.containers.ContainerUtil
 import kim.nzxy.spel.json.ConfigJsonUtil
 import kim.nzxy.spel.json.SpELInfo
+import org.jetbrains.kotlin.psi.KtValueArgument
 import org.jetbrains.uast.getContainingAnnotationEntry
 import org.jetbrains.uast.toUElement
 
@@ -64,7 +65,11 @@ class SpELConfigService {
     fun getFieldPath(context: PsiElement): Pair<String, String>? {
         val anno = getContainingAnnotationEntry(context.toUElement())?.first ?: return null
         val qualifiedName = anno.qualifiedName ?: return null
-        val attrName = PsiTreeUtil.getParentOfType(context, PsiNameValuePair::class.java)?.attributeName ?: return null
+        var attrName = PsiTreeUtil.getParentOfType(context, PsiNameValuePair::class.java)?.attributeName
+        if (attrName == null) {
+            val valueArgument = PsiTreeUtil.getParentOfType(context, KtValueArgument::class.java) ?: return null
+            attrName = valueArgument.getArgumentName()?.text ?: "value"
+        }
         return Pair(qualifiedName, attrName)
     }
 

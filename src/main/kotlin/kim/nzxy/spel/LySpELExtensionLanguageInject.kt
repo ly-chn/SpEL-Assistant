@@ -6,11 +6,12 @@ import com.intellij.lang.injection.general.SimpleInjection
 import com.intellij.psi.PsiElement
 import com.intellij.psi.PsiLiteralExpression
 import com.intellij.spring.el.SpringELLanguage
+import org.jetbrains.kotlin.psi.KtStringTemplateExpression
 
 class LySpELExtensionLanguageInject : LanguageInjectionContributor {
     private val injection = SimpleInjection(SpringELLanguage.INSTANCE, "", "", null)
     override fun getInjection(context: PsiElement): Injection? {
-        if (context !is PsiLiteralExpression) {
+        if (context !is PsiLiteralExpression && context !is KtStringTemplateExpression) {
             return null
         }
 

@@ -21,13 +21,13 @@
     <depends>com.intellij.javaee.el</depends>
     <depends>com.intellij.spring.mvc</depends>
     <depends>org.intellij.intelliLang</depends>
-    <depends>org.jetbrains.plugins.yaml</depends>
     <depends>JavaScript</depends>
+    <depends>org.jetbrains.kotlin</depends>
     <extensions defaultExtensionNs="com.intellij">
         <completion.contributor language="JSON" implementationClass="kim.nzxy.spel.json.SpELJsonCompletionContributor"/>
         <spring.el.contexts implementation="kim.nzxy.spel.LySpringElContextsExtension" order="first" id="SpEL-ly-chn"/>
         <languageInjectionContributor implementationClass="kim.nzxy.spel.LySpELExtensionLanguageInject"
-                                      order="first" language="JAVA"/>
+                                      order="first" language="UAST"/>
         <localInspection language="JSON" shortName="SpELJsonKey"
                          displayName="SpEL JSON Inspection"
                          groupName="SpEL extension"

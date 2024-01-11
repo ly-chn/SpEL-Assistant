@@ -24,7 +24,7 @@ repositories {
 }
 
 intellij {
-    version.set("2021.3")
+    version.set("2022.3")
     type.set("IU") // Target IDE Platform
 
     plugins.set(
@@ -33,8 +33,7 @@ intellij {
             "com.intellij.spring.mvc",
             "org.intellij.intelliLang",
             "com.intellij.java",
-            "org.jetbrains.plugins.yaml",
-            "com.intellij.spring.boot",
+            "org.jetbrains.kotlin",
             "JavaScript"
         )
     )
