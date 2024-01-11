@@ -1,43 +1,50 @@
 {
-  "version": "0.7",
+  "version": "1.0.0",
   "definitions": {
     "Method": {
       "type": "object",
       "title": "Method",
-      "description": "Define method result and parameters",
+        "description": "Defines whether the return value and parameters of a method can be used as SpEL variables",
       "additionalProperties": false,
       "properties": {
         "result": {
           "type": "boolean",
-          "description": "Support method result type, named that #resultName",
+          "description": "Use the return value as a SpEL variable",
           "default": false
         },
-        "resultName":{
+        "resultName": {
           "type": "string",
-          "pattern": "[a-zA-Z]+",
-          "description": "Variable name of method result",
+          "pattern": "^[a-zA-Z_]+\\w*$",
+          "description": "If the return value is used as a variable, then this configuration will serve as the name of the variable.",
           "default": "result"
         },
         "parameters": {
           "type": "boolean",
-          "description": "if method, support parameter list as SpEL variables",
+          "description": "Use the method's parameter list as SpEL variables",
           "default": false
         },
         "parametersPrefix": {
           "type": "array",
-          "description": "If provided, parameter name will be alias as `${prefix}${parameterIndex}`, such as p0, p1, a0, a1",
-          "additionalItems": {
-            "type": "string"
+          "description": "If prefix provided, parameter names will be aliased as ${prefix}${index}, e.g. p0, p1, a0, a1.",
+          "items": {
+            "type": "string",
+            "pattern": "^[a-zA-Z_]+\\w*$"
           },
           "uniqueItems": true,
-          "default": [["p", "a"]]
+          "default": [
+            [
+              "p",
+              "a"
+            ]
+          ]
         }
       }
     },
     "Fields": {
       "type": "object",
+      "description": "Defines additional SpEL variables and types.",
       "patternProperties": {
-        "^.*$": {
+        "^[a-zA-Z_]+\\w*$": {
           "type": "string",
           "x-intellij-language-injection": {
             "language": "JAVA",
@@ -46,14 +53,13 @@
           }
         }
       },
-      "additionalProperties": false,
-      "examples": ["a"]
+      "additionalProperties": false
     }
   },
   "type": "object",
   "$schema": "http://json-schema.org/draft-07/schema#",
   "patternProperties": {
-    "^.*$": {
+    "^[\\w.]+$": {
       "type": "object",
       "properties": {
         "fields": {

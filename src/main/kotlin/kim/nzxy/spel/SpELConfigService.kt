@@ -3,23 +3,26 @@ package kim.nzxy.spel
 import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.components.Service
 import com.intellij.openapi.fileEditor.impl.LoadTextUtil
-import com.intellij.openapi.module.Module
 import com.intellij.openapi.module.ModuleManager
+import com.intellij.openapi.project.DumbService
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.roots.ModuleRootManager
-import com.intellij.openapi.vfs.VFileProperty
+import com.intellij.openapi.roots.ProjectRootManager
 import com.intellij.openapi.vfs.VirtualFile
-import com.intellij.psi.PsiFile
+import com.intellij.psi.*
 import com.intellij.psi.search.FilenameIndex
 import com.intellij.psi.search.ProjectScope
 import com.intellij.psi.util.CachedValueProvider
 import com.intellij.psi.util.CachedValuesManager
 import com.intellij.psi.util.PsiModificationTracker
+import com.intellij.psi.util.PsiTreeUtil
 import com.intellij.util.SmartList
+import com.intellij.util.containers.ConcurrentFactoryMap
 import com.intellij.util.containers.ContainerUtil
 import kim.nzxy.spel.json.ConfigJsonUtil
 import kim.nzxy.spel.json.SpELInfo
-import kotlinx.coroutines.flow.merge
+import org.jetbrains.uast.getContainingAnnotationEntry
+import org.jetbrains.uast.toUElement
 
 /**
  * @author ly-chn
@@ -28,19 +31,48 @@ import kotlinx.coroutines.flow.merge
 @Service
 class SpELConfigService {
     companion object {
+        private val fieldNameRegex = Regex("^[a-zA-Z_]\\w*$")
         fun getInstance(): SpELConfigService {
             return ApplicationManager.getApplication().getService(SpELConfigService::class.java)
         }
     }
 
+    fun getSpELInfo(project: Project, fieldPath: String): SpELInfo? {
+        return getLocalMetaConfigKeys(project)[fieldPath] ?: getLibrariesConfigKeys(project)[fieldPath]
+    }
 
-    fun getAllMetaConfigKeys(module: Module): HashMap<String, SpELInfo> {
-        val fromLibraries = getLibrariesConfigKeys(module)
-        val localKeys = getLocalMetaConfigKeys(module.project)
-        val res = HashMap<String, SpELInfo>()
-        res.putAll(fromLibraries)
-        localKeys.forEach { (k, v) -> res[k] = mergeSpELInfo(v, res[k]) }
-        return res
+    fun hasSpELInfo(project: Project, fieldPath: String): Boolean {
+        return getLibrariesConfigKeys(project).containsKey(fieldPath)
+                || getLocalMetaConfigKeys(project).containsKey(fieldPath)
+    }
+
+    fun findPsiType(project: Project, className: String): PsiType? {
+        val cache: Map<String, PsiType?> = CachedValuesManager.getManager(project).getCachedValue(project) {
+            val map: Map<String, PsiType?> = ConcurrentFactoryMap.createMap { key: String ->
+                DumbService.getInstance(project).runReadActionInSmartMode<PsiType?> {
+                    JavaPsiFacade.getElementFactory(project).createTypeFromText(key, null)
+                }
+            }
+            CachedValueProvider.Result.createSingleDependency(
+                map,
+                ProjectRootManager.getInstance(project)
+            )
+        }
+        return cache[className]
+    }
+
+    fun getFieldPath(context: PsiElement): Pair<String, String>? {
+        val anno = getContainingAnnotationEntry(context.toUElement())?.first ?: return null
+        val qualifiedName = anno.qualifiedName ?: return null
+        val attrName = PsiTreeUtil.getParentOfType(context, PsiNameValuePair::class.java)?.attributeName ?: return null
+        return Pair(qualifiedName, attrName)
+    }
+
+    private fun isValidFieldName(fieldName: String?): Boolean {
+        return when (fieldName) {
+            null -> false
+            else -> fieldNameRegex.matches(fieldName)
+        }
     }
 
     private fun getLocalMetaConfigKeys(project: Project): HashMap<String, SpELInfo> {
@@ -49,11 +81,9 @@ class SpELConfigService {
             val allKeys = HashMap<String, SpELInfo>()
             for (module in ModuleManager.getInstance(project).modules) {
                 for (sourceRoot in ModuleRootManager.getInstance(module).sourceRoots) {
-                    sourceRoot.findFileByRelativePath("spel-extension.json").let {
-                        if (it != null) {
-                            dependencies.add(it)
-                            parseConfig(it, allKeys)
-                        }
+                    sourceRoot.findFileByRelativePath(ConfigJsonUtil.FILENAME)?.let {
+                        dependencies.add(it)
+                        parseConfig(it, allKeys)
                     }
                 }
             }
@@ -63,31 +93,26 @@ class SpELConfigService {
         }
     }
 
-    private fun parseConfig(file: VirtualFile, collect: HashMap<String, SpELInfo>) {
+    private fun parseConfig(file: VirtualFile, collector: HashMap<String, SpELInfo>) {
         val text = LoadTextUtil.loadText(file)
         val info = ConfigJsonUtil.parseSpELInfo(text) ?: return
-        info.forEach { (k, v) ->
-            collect[k] = mergeSpELInfo(v, collect[k])
+        info.forEach { (_, v) ->
+            if (!isValidFieldName(v.method.resultName)) {
+                v.method.resultName = SpELConst.methodResultNameDefault
+            }
+            v.fields.forEach { (k, _) ->
+                if (!isValidFieldName(k)) {
+                    v.fields.remove(k)
+                }
+            }
+            v.method.parametersPrefix?.removeIf { !isValidFieldName(it) }
         }
+        collector.putAll(info)
     }
 
-    private fun mergeSpELInfo(first: SpELInfo, second: SpELInfo?): SpELInfo {
-        if (second == null) {
-            return first
-        }
-        first.fields.putAll(second.fields)
-        first.method.result = first.method.result || second.method.result
-        first.method.parameters = first.method.parameters || second.method.parameters
-        first.method.resultName = first.method.resultName ?: second.method.resultName
-        first.method.parametersPrefix?.addAll(second.method.parametersPrefix ?: emptySet())
-        val prefix = first.method.parametersPrefix ?: second.method.parametersPrefix
-        first.method.parametersPrefix = prefix
-        return first
-    }
-
-    private fun getLibrariesConfigKeys(module: Module): HashMap<String, SpELInfo> {
-        return CachedValuesManager.getManager(module.project).getCachedValue(module) {
-            val metaInfConfigFiles = findConfigFiles(module)
+    private fun getLibrariesConfigKeys(project: Project): HashMap<String, SpELInfo> {
+        return CachedValuesManager.getManager(project).getCachedValue(project) {
+            val metaInfConfigFiles = findConfigFiles(project)
             val allKeys = HashMap<String, SpELInfo>()
 
             for (psiFile in metaInfConfigFiles) {
@@ -100,12 +125,9 @@ class SpELConfigService {
         }
     }
 
-    private fun findConfigFiles(module: Module): List<PsiFile> {
-        val configFiles = FilenameIndex.getFilesByName(
-            module.project,
-            "spel-extension.json",
-            ProjectScope.getLibrariesScope(module.project)
-        )
+    private fun findConfigFiles(project: Project): List<PsiFile> {
+        val configFiles =
+            FilenameIndex.getFilesByName(project, ConfigJsonUtil.FILENAME, ProjectScope.getLibrariesScope(project))
         if (configFiles.isEmpty()) {
             return emptyList()
         }

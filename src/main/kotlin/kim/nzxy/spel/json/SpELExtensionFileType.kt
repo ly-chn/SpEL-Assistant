@@ -13,9 +13,9 @@ import com.intellij.spring.SpringApiIcons
 object SpELExtensionFileType : LanguageFileType(JsonLanguage.INSTANCE, true), FileTypeIdentifiableByVirtualFile {
     val INSTANCE: SpELExtensionFileType = SpELExtensionFileType
 
-    override fun getName() = "spel-extension.json"
+    override fun getName() = ConfigJsonUtil.FILENAME
 
-    override fun getDescription() = "spel-extension.json"
+    override fun getDescription() = ConfigJsonUtil.FILENAME
 
     override fun getDefaultExtension() = "json"
 

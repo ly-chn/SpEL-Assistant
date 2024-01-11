@@ -14,9 +14,10 @@ import java.util.stream.Collectors
  * @since 2024/1/5 11:14
  */
 object ConfigJsonUtil {
+    const val FILENAME = "spel-extension.json"
     private val gson = Gson()
     fun isSpELFilename(filename: String): Boolean {
-        return filename == "spel-extension.json"
+        return filename == FILENAME
     }
 
     fun getParentNames(property: JsonProperty): String {

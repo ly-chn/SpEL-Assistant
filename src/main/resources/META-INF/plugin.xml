@@ -30,7 +30,7 @@
                                       order="first" language="JAVA"/>
         <localInspection language="JSON" shortName="SpELJsonKey"
                          displayName="SpEL JSON Inspection"
-                         groupName="SpEL JSON Inspection"
+                         groupName="SpEL extension"
                          enabledByDefault="true" level="WARNING"
                          implementationClass="kim.nzxy.spel.json.SpELJsonKeyInspection"/>
         <fileType name="spel-extension.json" fieldName="INSTANCE"
