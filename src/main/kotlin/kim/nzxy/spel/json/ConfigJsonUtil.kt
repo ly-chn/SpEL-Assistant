@@ -5,6 +5,7 @@ import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import com.intellij.json.psi.JsonFile
 import com.intellij.json.psi.JsonProperty
+import com.intellij.openapi.util.text.StringUtil
 import com.intellij.psi.PsiElement
 import com.intellij.psi.util.PsiTreeUtil
 import java.util.stream.Collectors
@@ -49,6 +50,9 @@ object ConfigJsonUtil {
 
     fun relaxMatch(prefix: String, text: String): Boolean {
         if (text.isEmpty() || prefix.isEmpty()) {
+            return false
+        }
+        if (!StringUtil.charsEqualIgnoreCase(prefix[0], text[0])) {
             return false
         }
         var index = 0

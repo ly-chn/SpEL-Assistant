@@ -5,4 +5,4 @@ pluginManagement {
     }
 }
 
-rootProject.name = "spel-extension"
+rootProject.name = "spel-assistant"

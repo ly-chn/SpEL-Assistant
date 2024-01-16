@@ -1,13 +1,12 @@
 <idea-plugin>
     <id>kim.nzxy.spel</id>
 
-    <name>SpEL Extension</name>
+    <name>SpEL Assistant</name>
 
     <vendor email="lyun.chn@gmail.com" url="https://nzxy.kim">NzXy</vendor>
 
     <description><![CDATA[
-        Custom SpEL variables support in your annotations, use it with <a
-                href="https://github.com/ly-chn/spel-extension">SpEL Extension</a>.
+        Custom SpEL variables support in your annotations.
         You can define variables for:
         <ul>
             <li>method result</li>
@@ -30,7 +29,7 @@
                                       order="first" language="UAST"/>
         <localInspection language="JSON" shortName="SpELJsonKey"
                          displayName="SpEL JSON Inspection"
-                         groupName="SpEL extension"
+                         groupName="SpEL assistant"
                          enabledByDefault="true" level="WARNING"
                          implementationClass="kim.nzxy.spel.json.SpELJsonKeyInspection"/>
         <fileType name="spel-extension.json" fieldName="INSTANCE"

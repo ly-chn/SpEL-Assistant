@@ -7,6 +7,7 @@ import com.intellij.json.psi.JsonFile
 import com.intellij.json.psi.JsonProperty
 import com.intellij.json.psi.JsonReferenceExpression
 import com.intellij.json.psi.JsonStringLiteral
+import com.intellij.openapi.util.text.StringUtil
 import com.intellij.psi.PsiElement
 import com.intellij.psi.PsiErrorElement
 import com.intellij.psi.codeStyle.CodeStyleManager
@@ -48,8 +49,10 @@ class SpELJsonCompletionContributor : CompletionContributor() {
             .map { (it as JsonProperty).name }
         val service = JsonSuggestionService.getInstance()
         val configKeys = service.getAllMetaConfigKeys(element.project)
+        var text = CompletionUtil.getOriginalElement(element)?.text ?:return
+        text = StringUtil.unquoteString(text)
         for (configKey in configKeys) {
-            if (!existedKeys.contains(configKey) && ConfigJsonUtil.relaxMatch(element.text, configKey)) {
+            if (!existedKeys.contains(configKey) && ConfigJsonUtil.relaxMatch(text, configKey)) {
                 // todo: filter current configKey
                 result.addElement(LookupElementBuilder.create(configKey).withInsertHandler(SpELInsertHandler))
             }

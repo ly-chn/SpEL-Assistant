@@ -20,7 +20,7 @@ class JsonSuggestionService {
         arrayOf("jdk.", "java.", "javax.", "jakarta.", "lombok.", "org.springframework", "kotlin.")
 
     // todo: for library and source tracker
-    private val regularTracking = ModificationTracker { System.currentTimeMillis() / 1000 }
+    private val regularTracking = ModificationTracker { System.currentTimeMillis() / 10000 }
 
     companion object {
         fun getInstance(): JsonSuggestionService {
