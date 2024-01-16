@@ -1,6 +1,5 @@
 package kim.nzxy.spel.json
 
-import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.psi.PsiFile
 
 /**

@@ -3,7 +3,6 @@ package kim.nzxy.spel
 import com.intellij.ide.plugins.PluginManagerCore
 import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.components.Service
-import com.intellij.openapi.components.service
 import com.intellij.openapi.extensions.PluginId
 
 /**

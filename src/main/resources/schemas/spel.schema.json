@@ -4,7 +4,7 @@
     "Method": {
       "type": "object",
       "title": "Method",
-        "description": "Defines whether the return value and parameters of a method can be used as SpEL variables",
+      "description": "Defines whether the return value and parameters of a method can be used as SpEL variables",
       "additionalProperties": false,
       "properties": {
         "result": {

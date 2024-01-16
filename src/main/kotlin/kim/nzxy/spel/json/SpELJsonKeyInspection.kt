@@ -36,9 +36,11 @@ class SpELJsonKeyInspection : LocalInspectionTool() {
         keys.forEach { (k, v) ->
             if (!enabledKeys.contains(k)) {
                 // todo: msg bundle
-                holder.registerProblem(v,
+                holder.registerProblem(
+                    v,
                     "Could not find the corresponding annotation or field in the annotation",
-                    ProblemHighlightType.WARNING)
+                    ProblemHighlightType.WARNING
+                )
             }
         }
     }
