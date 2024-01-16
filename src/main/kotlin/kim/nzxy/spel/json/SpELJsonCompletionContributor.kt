@@ -11,7 +11,9 @@ import com.intellij.psi.PsiElement
 import com.intellij.psi.PsiErrorElement
 import com.intellij.psi.codeStyle.CodeStyleManager
 import com.intellij.psi.impl.source.tree.LeafPsiElement
+import com.intellij.psi.search.ProjectScope
 import com.intellij.psi.util.PsiTreeUtil
+import org.jetbrains.kotlin.idea.editor.fixers.end
 
 /**
  * @author ly-chn
@@ -39,7 +41,7 @@ class SpELJsonCompletionContributor : CompletionContributor() {
     }
 
     private fun handleJsonProperty(element: PsiElement, property: JsonProperty, result: CompletionResultSet) {
-        if (!isPropertyKey(element)) return
+        if (!ConfigJsonUtil.isPropertyKey(element)) return
         val presentNamePart: String = ConfigJsonUtil.getParentNames(property)
         if (presentNamePart.isNotEmpty()) {
             return
@@ -50,26 +52,19 @@ class SpELJsonCompletionContributor : CompletionContributor() {
         val configKeys = service.getAllMetaConfigKeys(element.project)
         for (configKey in configKeys) {
             if (!existedKeys.contains(configKey)) {
+                // todo: filter current configKey
                 result.addElement(LookupElementBuilder.create(configKey).withInsertHandler(SpELInsertHandler))
             }
         }
-    }
-
-    private fun isPropertyKey(element: PsiElement): Boolean {
-        var sibling = element.parent
-        while ((sibling.prevSibling.also { sibling = it }) != null) {
-            if (":" == sibling.text) return false
-        }
-        return true
     }
 
     object SpELInsertHandler : InsertHandler<LookupElement> {
         override fun handleInsert(context: InsertionContext, item: LookupElement) {
             val element = context.file.findElementAt(context.startOffset) ?: return
             val literal = PsiTreeUtil.getParentOfType(element, JsonStringLiteral::class.java, false)
-            val range = PsiTreeUtil.getParentOfType(element, JsonStringLiteral::class.java, false)?.textRange
-                ?: element.textRange
+            val range = literal?.textRange ?: element.textRange
             var hasBody = false
+            val hasQuote = literal != null
             if (literal != null) {
                 val next = PsiTreeUtil.nextLeaf(literal)
                 if (next != null && next !is PsiErrorElement) {
@@ -82,7 +77,9 @@ class SpELJsonCompletionContributor : CompletionContributor() {
                 """"${item.lookupString}": {"method": {"result": false,"resultName": "result","parameters": false,
                     "parametersPrefix": ["p", "a"],},"fields": {"demo": "java.util.Map<String, String>"}},"""
             }
-            context.document.replaceString(range.startOffset, range.endOffset, quoted)
+            val endOffSet = if (hasBody || hasQuote) range.endOffset else range.startOffset + item.lookupString.length
+            // 引号内, 引号外, 后面有字符串, 后面没有字符串, 有body, 无body
+            context.document.replaceString(range.startOffset, endOffSet, quoted)
             context.commitDocument()
             CodeStyleManager.getInstance(context.project)
                 .reformatText(context.file, range.startOffset, range.startOffset + quoted.length)

@@ -8,69 +8,15 @@
 
 ![demo](./doc/img/demo.png)
 
-## 使用
+### 使用
 
-1. 引入相关注解
+1. [安装此插件](https://plugins.jetbrains.com/plugin/23337-spel-extension/)
 
-   in `pom.xml`(Maven)
+2. 在项目中resource文件夹下新建`spel-extension.json`配置文件
 
-   ```xml
-   <dependency>
-       <groupId>kim.nzxy</groupId>
-       <artifactId>spel-extension</artifactId>
-       <version>1.0.0</version>
-       <scope>provided</scope>
-   </dependency>
-   ```
+   > 如果您引入的第三方库也包含此文件, 则会一并纳入到配置中, 其中针对同一个注解上的字段的配置, 本地配置将会覆盖库中的配置
 
-   or `build.gradle`(Groovy DSL)
+3. 正常在项目中调用即可, 如果没能及时生效, 请尝试手动保存一下`spel-extension.json`文件, 以便快速生效
 
-   ```groovy
-   dependencies {
-       compileOnly 'kim.nzxy:spel-extension:1.0.0'
-   }
-   ```
+### 配置详解
 
-   or `build.gradle.kts`(Kotlin DSL)
-
-   ```kotlin
-   dependencies {
-       compileOnly("kim.nzxy:spel-extension:1.0.0")
-   }
-   ```
-
-2. [安装此插件](https://plugins.jetbrains.com/plugin/23337-spel-extension/)
-
-## 说明
-
-以下是各个注解的详细解释
-
-### `@kim.nzxy.spel.SpELMethod`----函数相关
-
-如果标注了SpELMethod的注解作用于方法上, 则提示方法的返回值和参数信息
-
-| 名称             | 类型     | 默认值     | 解释                                                         |
-| ---------------- | -------- | ---------- | ------------------------------------------------------------ |
-| result           | boolean  | false      | 为true则支持方法返回值                                       |
-| resultName       | String   | "result"   | 方法返回值的变量名称                                         |
-| parameters       | boolean  | false      | 为true表示支持方法参数, 默认支持所有参数名称                 |
-| parametersPrefix | String[] | {"p", "a"} | 方法参数序号名称, 如p0/a0表示第一个参数<br />如不需要, 可手动指定`parametersPrefix = {}` |
-
-## `@kim.nzxy.spel.SpELField`--字段相关
-
-定义该字段的变量参数, 支持定义多个
-
-| 名称    | 类型     | 默认值       | 解释                                                         |
-| ------- | -------- | ------------ | ------------------------------------------------------------ |
-| name    | String   | \            | SpEL变量名, 如果为"root", 则视为SpEL的root节点               |
-| type    | Class<?> | Object.class | 变量类型, 如果`typeStr`非空, 则忽略此字段                    |
-| typeStr | String   | ""           | 变量类型, 支持泛型, 示例: `String`, `java.lang.String`, `java.util.List<String>` |
-
-### `@kim.nzxy.spel.SpELWith`--方便定义常量
-
-如果参数特别长, 可以用来方便的定义常量, 此注解可以方便的在常量字符串中支持代码提示
-
-| 名称  | 类型                        | 默认值  | 解释             |
-| ----- | --------------------------- | ------- | ---------------- |
-| anno  | Class<? extends Annotation> | \       | 对应注解         |
-| field | String                      | "value" | 对应注解字段名称 |

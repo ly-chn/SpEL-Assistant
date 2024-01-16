@@ -24,7 +24,7 @@ repositories {
 }
 
 intellij {
-    version.set("2022.1")
+    version.set("2022.3")
     type.set("IU") // Target IDE Platform
 
     plugins.set(
@@ -41,11 +41,11 @@ intellij {
 
 tasks {
     withType<JavaCompile> {
-        sourceCompatibility = "8"
-        targetCompatibility = "8"
+        sourceCompatibility = "11"
+        targetCompatibility = "11"
     }
     withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {
-        kotlinOptions.jvmTarget = "1.8"
+        kotlinOptions.jvmTarget = "11"
     }
 
     patchPluginXml {

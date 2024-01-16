@@ -20,6 +20,14 @@ object ConfigJsonUtil {
         return filename == FILENAME
     }
 
+    fun isPropertyKey(element: PsiElement): Boolean {
+        var sibling = element.parent
+        while ((sibling.prevSibling.also { sibling = it }) != null) {
+            if (":" == sibling.text) return false
+        }
+        return true
+    }
+
     fun getParentNames(property: JsonProperty): String {
         val parentProperties = PsiTreeUtil.collectParents(
             property,

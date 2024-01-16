@@ -36,6 +36,7 @@
         <fileType name="spel-extension.json" fieldName="INSTANCE"
                   fileNames="spel-extension.json"
                   implementationClass="kim.nzxy.spel.json.SpELExtensionFileType"/>
+        <gotoDeclarationHandler implementation="kim.nzxy.spel.JsonSpELSymbolGotoDeclarationHandler"/>
     </extensions>
     <extensions defaultExtensionNs="org.intellij.intelliLang">
         <injectionConfig config="lySpELInjections.xml"/>

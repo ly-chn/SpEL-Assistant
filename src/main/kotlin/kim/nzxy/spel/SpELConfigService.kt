@@ -4,6 +4,8 @@ import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.components.Service
 import com.intellij.openapi.fileEditor.impl.LoadTextUtil
 import com.intellij.openapi.module.ModuleManager
+import com.intellij.openapi.module.impl.scopes.JdkScope
+import com.intellij.openapi.module.impl.scopes.LibraryScope
 import com.intellij.openapi.project.DumbService
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.roots.ModuleRootManager
@@ -11,6 +13,7 @@ import com.intellij.openapi.roots.ProjectRootManager
 import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.psi.*
 import com.intellij.psi.search.FilenameIndex
+import com.intellij.psi.search.GlobalSearchScope
 import com.intellij.psi.search.ProjectScope
 import com.intellij.psi.util.CachedValueProvider
 import com.intellij.psi.util.CachedValuesManager
@@ -21,6 +24,7 @@ import com.intellij.util.containers.ConcurrentFactoryMap
 import com.intellij.util.containers.ContainerUtil
 import kim.nzxy.spel.json.ConfigJsonUtil
 import kim.nzxy.spel.json.SpELInfo
+import org.jetbrains.kotlin.idea.core.util.toPsiFile
 import org.jetbrains.kotlin.psi.KtValueArgument
 import org.jetbrains.uast.getContainingAnnotationEntry
 import org.jetbrains.uast.toUElement
@@ -89,7 +93,7 @@ class SpELConfigService {
                 for (sourceRoot in ModuleRootManager.getInstance(module).sourceRoots) {
                     sourceRoot.findFileByRelativePath(ConfigJsonUtil.FILENAME)?.let {
                         dependencies.add(it)
-                        parseConfig(it, allKeys)
+                        parseConfig(project, it, allKeys)
                     }
                 }
             }
@@ -99,7 +103,7 @@ class SpELConfigService {
         }
     }
 
-    private fun parseConfig(file: VirtualFile, collector: HashMap<String, SpELInfo>) {
+    private fun parseConfig(project: Project, file: VirtualFile, collector: HashMap<String, SpELInfo>) {
         val text = LoadTextUtil.loadText(file)
         val info = ConfigJsonUtil.parseSpELInfo(text) ?: return
         info.forEach { (_, v) ->
@@ -112,6 +116,7 @@ class SpELConfigService {
                 }
             }
             v.method.parametersPrefix?.removeIf { !isValidFieldName(it) }
+            v.sourceFile = file.toPsiFile(project)
         }
         collector.putAll(info)
     }
@@ -120,23 +125,17 @@ class SpELConfigService {
         return CachedValuesManager.getManager(project).getCachedValue(project) {
             val metaInfConfigFiles = findConfigFiles(project)
             val allKeys = HashMap<String, SpELInfo>()
-
-            for (psiFile in metaInfConfigFiles) {
-                parseConfig(psiFile.virtualFile, allKeys)
+            for (file in metaInfConfigFiles) {
+                parseConfig(project, file, allKeys)
             }
-
             CachedValueProvider.Result.create(
                 allKeys, PsiModificationTracker.MODIFICATION_COUNT
             )
         }
     }
 
-    private fun findConfigFiles(project: Project): List<PsiFile> {
-        val configFiles =
-            FilenameIndex.getVirtualFilesByName(ConfigJsonUtil.FILENAME, ProjectScope.getLibrariesScope(project))
-        if (configFiles.isEmpty()) {
-            return emptyList()
-        }
-        return ContainerUtil.findAll(configFiles, PsiFile::class.java)
+    private fun findConfigFiles(project: Project): List<VirtualFile> {
+        return FilenameIndex.getVirtualFilesByName(ConfigJsonUtil.FILENAME, ProjectScope.getLibrariesScope(project))
+            .filter { !it.path.contains("-sources.jar!") }
     }
 }
