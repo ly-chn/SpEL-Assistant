@@ -16,7 +16,7 @@ class LySpringElContextsExtension : SpringElContextsExtension() {
         val service = SpELConfigService.getInstance()
         val context = contextElement.context ?: return collector
         val fieldPath = service.getFieldPath(context) ?: return collector
-        val spELInfo = service.getSpELInfo(contextElement.project, "${fieldPath.first}#${fieldPath.second}")
+        val spELInfo = service.getSpELInfo(contextElement.project, "${fieldPath.first}@${fieldPath.second}")
             ?: return collector
         fixMethod(context, spELInfo, collector)
         fixFields(context, spELInfo, collector)
@@ -65,7 +65,7 @@ class LySpringElContextsExtension : SpringElContextsExtension() {
         val context = contextElement.context ?: return collector
         val service = SpELConfigService.getInstance()
         val fieldPath = service.getFieldPath(context) ?: return collector
-        val spElMetaConfig = service.getSpELInfo(contextElement.project, "${fieldPath.first}#${fieldPath.second}")
+        val spElMetaConfig = service.getSpELInfo(contextElement.project, "${fieldPath.first}@${fieldPath.second}")
             ?: return collector
         spElMetaConfig.fields[SpELConst.rootName]?.let { rootClass ->
             service.findPsiType(contextElement.project, rootClass)?.let { psiType ->

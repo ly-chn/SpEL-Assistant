@@ -21,7 +21,7 @@ class JsonSpELSymbolGotoDeclarationHandler : GotoDeclarationHandler {
         if (!ConfigJsonUtil.isPropertyKey(element)) return null
         val property = PsiTreeUtil.getParentOfType(element, JsonProperty::class.java) ?: return null
         if (ConfigJsonUtil.getParentNames(property).isNotEmpty()) return null
-        val symbol = element.text.trim('"').split('#')
+        val symbol = element.text.trim('"').split('@')
         if (symbol.size != 2) return null
         val (cls, method) = symbol
         JavaPsiFacade.getInstance(element.project)

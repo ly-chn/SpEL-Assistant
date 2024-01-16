@@ -37,7 +37,7 @@ class JsonSuggestionService {
                 if (ignoredQualifiedPrefix.any { qualifiedName.startsWith(it) }) return@forEach
                 anno.methods.forEach {
                     if (it.returnType == stringType) {
-                        res.add("$qualifiedName#${it.name}")
+                        res.add("$qualifiedName@${it.name}")
                     }
                 }
             }

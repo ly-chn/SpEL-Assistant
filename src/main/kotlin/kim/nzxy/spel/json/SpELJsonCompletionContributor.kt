@@ -11,9 +11,7 @@ import com.intellij.psi.PsiElement
 import com.intellij.psi.PsiErrorElement
 import com.intellij.psi.codeStyle.CodeStyleManager
 import com.intellij.psi.impl.source.tree.LeafPsiElement
-import com.intellij.psi.search.ProjectScope
 import com.intellij.psi.util.PsiTreeUtil
-import org.jetbrains.kotlin.idea.editor.fixers.end
 
 /**
  * @author ly-chn
@@ -51,7 +49,7 @@ class SpELJsonCompletionContributor : CompletionContributor() {
         val service = JsonSuggestionService.getInstance()
         val configKeys = service.getAllMetaConfigKeys(element.project)
         for (configKey in configKeys) {
-            if (!existedKeys.contains(configKey)) {
+            if (!existedKeys.contains(configKey) && ConfigJsonUtil.relaxMatch(element.text, configKey)) {
                 // todo: filter current configKey
                 result.addElement(LookupElementBuilder.create(configKey).withInsertHandler(SpELInsertHandler))
             }

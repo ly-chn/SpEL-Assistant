@@ -47,4 +47,16 @@ object ConfigJsonUtil {
         }
     }
 
+    fun relaxMatch(prefix: String, text: String): Boolean {
+        if (text.isEmpty() || prefix.isEmpty()) {
+            return false
+        }
+        var index = 0
+        for (element in prefix) {
+            val found = text.indexOf(element, index)
+            if (found < 0) return false
+            index = found + 1
+        }
+        return true
+    }
 }
