@@ -10,7 +10,7 @@
 
 ### 使用
 
-1. [安装此插件](https://plugins.jetbrains.com/plugin/23337-spel-extension/)
+1. [安装此插件](https://plugins.jetbrains.com/plugin/23542-spel-assistant)
 
 2. 在项目中resource文件夹下新建`spel-extension.json`配置文件
 
