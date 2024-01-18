@@ -88,7 +88,7 @@ class SpELConfigService {
         return CachedValuesManager.getManager(project).getCachedValue(project) {
             val dependencies = SmartList<Any>(PsiModificationTracker.MODIFICATION_COUNT)
             val allKeys = HashMap<String, SpELInfo>()
-            for (module in ModuleManager.getInstance(project).modules) {
+            for (module in project.getComponent(ModuleManager::class.java).modules) {
                 for (sourceRoot in ModuleRootManager.getInstance(module).sourceRoots) {
                     sourceRoot.findFileByRelativePath(ConfigJsonUtil.FILENAME)?.let {
                         dependencies.add(it)
@@ -106,15 +106,11 @@ class SpELConfigService {
         val text = LoadTextUtil.loadText(file)
         val info = ConfigJsonUtil.parseSpELInfo(text) ?: return
         info.forEach { (_, v) ->
-            if (!isValidFieldName(v.method.resultName)) {
-                v.method.resultName = SpELConst.methodResultNameDefault
+            if (!isValidFieldName(v.method?.resultName)) {
+                v.method?.resultName = SpELConst.methodResultNameDefault
             }
-            v.fields.forEach { (k, _) ->
-                if (!isValidFieldName(k)) {
-                    v.fields.remove(k)
-                }
-            }
-            v.method.parametersPrefix?.removeIf { !isValidFieldName(it) }
+            v.fields?.entries?.removeIf{!isValidFieldName(it.key)}
+            v.method?.parametersPrefix?.removeIf { !isValidFieldName(it) }
             v.sourceFile = file.toPsiFile(project)
         }
         collector.putAll(info)

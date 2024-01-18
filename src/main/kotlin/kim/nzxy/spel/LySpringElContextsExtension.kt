@@ -26,7 +26,7 @@ class LySpringElContextsExtension : SpringElContextsExtension() {
     private fun fixMethod(context: PsiElement, config: SpELInfo, collector: SmartList<PsiVariable>) {
         val methodConfig = config.method
         val method = PsiTreeUtil.getParentOfType(context, PsiMethod::class.java) ?: return
-        if (methodConfig.result) {
+        if (methodConfig?.result == true) {
             val resultName = methodConfig.resultName ?: SpELConst.methodResultNameDefault
             val returnTypeElement = method.returnTypeElement
             val returnType = method.returnType
@@ -34,7 +34,7 @@ class LySpringElContextsExtension : SpringElContextsExtension() {
                 collector.add(LySpELContextVariable(resultName, returnType, config.sourceFile!!))
             }
         }
-        if (!methodConfig.parameters) return
+        if (methodConfig?.parameters != true) return
         for ((index, parameter) in method.parameterList.parameters.withIndex()) {
             val parameterType = parameter.type
             collector.add(parameter)
@@ -52,7 +52,7 @@ class LySpringElContextsExtension : SpringElContextsExtension() {
 
     private fun fixFields(context: PsiElement, config: SpELInfo, collector: SmartList<PsiVariable>) {
         val project = context.project
-        config.fields.forEach { (name, typeStr) ->
+        config.fields?.forEach { (name, typeStr) ->
             val service = SpELConfigService.getInstance()
             service.findPsiType(project, typeStr)?.let {
                 collector.add(LySpELContextVariable(name, it, config.sourceFile!!))
@@ -67,7 +67,7 @@ class LySpringElContextsExtension : SpringElContextsExtension() {
         val fieldPath = service.getFieldPath(context) ?: return collector
         val spElMetaConfig = service.getSpELInfo(contextElement.project, "${fieldPath.first}@${fieldPath.second}")
             ?: return collector
-        spElMetaConfig.fields[SpELConst.rootName]?.let { rootClass ->
+        spElMetaConfig.fields?.get(SpELConst.rootName)?.let { rootClass ->
             service.findPsiType(contextElement.project, rootClass)?.let { psiType ->
                 if (psiType is PsiClassReferenceType) {
                     psiType.resolve()?.allMethods?.forEach {
