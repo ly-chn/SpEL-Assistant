@@ -5,7 +5,7 @@ plugins {
 }
 
 group = "kim.nzxy"
-version = "1.0.0"
+version = "1.0.1"
 
 tasks {
     buildSearchableOptions{
@@ -24,7 +24,7 @@ repositories {
 }
 
 intellij {
-    version.set("2022.2.5")
+    version.set("2021.3")
     type.set("IU") // Target IDE Platform
 
     plugins.set(
