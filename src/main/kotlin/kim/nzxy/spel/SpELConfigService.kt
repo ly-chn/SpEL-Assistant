@@ -88,7 +88,7 @@ class SpELConfigService {
         return CachedValuesManager.getManager(project).getCachedValue(project) {
             val dependencies = SmartList<Any>(PsiModificationTracker.MODIFICATION_COUNT)
             val allKeys = HashMap<String, SpELInfo>()
-            for (module in project.getComponent(ModuleManager::class.java).modules) {
+            for (module in ModuleManager.getInstance(project).modules) {
                 for (sourceRoot in ModuleRootManager.getInstance(module).sourceRoots) {
                     sourceRoot.findFileByRelativePath(ConfigJsonUtil.FILENAME)?.let {
                         dependencies.add(it)
