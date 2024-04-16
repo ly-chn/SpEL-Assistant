@@ -27,6 +27,8 @@
         <spring.el.contexts implementation="kim.nzxy.spel.LySpringElContextsExtension" order="first" id="SpEL-ly-chn"/>
         <languageInjectionContributor implementationClass="kim.nzxy.spel.LySpELExtensionLanguageInject"
                                       order="first" language="UAST"/>
+        <multiHostInjector implementationClass="kim.nzxy.spel.LySpELLanguageMultiHostInjector"
+                                      order="first" language="UAST"/>
         <localInspection language="JSON" shortName="SpELJsonKey"
                          displayName="SpEL JSON Inspection"
                          groupName="SpEL assistant"

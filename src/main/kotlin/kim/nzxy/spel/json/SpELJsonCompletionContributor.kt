@@ -75,7 +75,7 @@ class SpELJsonCompletionContributor : CompletionContributor() {
             val quoted = if (hasBody) {
                 "\"${item.lookupString}\""
             } else {
-                """"${item.lookupString}": {"method": {"result": false,"resultName": "result","parameters": false,
+                """"${item.lookupString}": {"prefix": "", "suffix": "", "method": {"result": false,"resultName": "result","parameters": false,
                     "parametersPrefix": ["p", "a"],},"fields": {"demo": "java.util.Map<String, String>"}},"""
             }
             val endOffSet = if (hasBody || hasQuote) range.endOffset else range.startOffset + item.lookupString.length

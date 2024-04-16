@@ -9,7 +9,9 @@ import com.intellij.psi.PsiFile
 data class SpELInfo(
     var method: SpELInfoMethod? = SpELInfoMethod(),
     var fields: HashMap<String, String>? = hashMapOf(),
-    var sourceFile: PsiFile?
+    var sourceFile: PsiFile?,
+    var prefix: String?,
+    var suffix: String?
 )
 
 data class SpELInfoMethod(

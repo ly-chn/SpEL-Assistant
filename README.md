@@ -20,4 +20,35 @@
 
 ### 配置详解
 
-![demo](./doc/img/json.png)
+```json5
+{
+   // 注解声明, 格式为`注解类@字段`
+   "kim.nzxy.demo.DemoAop@value": {
+      // 模板前缀, 为null和空字符串表示非模板, 默认为空
+      "prefix": "#{",
+      // 模板后缀, 为null和空字符串表示非模板, 默认为空
+      "suffix": "}",
+      // 对方法的扩展, 默认值如示例
+      "method": {
+         // 作用于方法上时, 支持方法返回值提示
+         "result": false,
+         // 方法返回值的SpEL变量名
+         "resultName": "result",
+         // 作用于方法上时, 支持方法参数提示
+         "parameters": false,
+         // 方法参数别名配置, 支持多个别名前缀, 如 [p0, a1, p2]分表表示第一个, 第二个, 第三个参数, 可空 
+         "parametersPrefix": [
+            "p",
+            "a"
+         ]
+      },
+      // 自定义字段, 默认为空
+      "fields": {
+         // 自定义变量以及类型, 支持非限定类名, 如String, Integer等, 否则需提供全限定类名
+         "demo": "java.util.Map<String, String>",
+         // 如果变量名为root, 则表示rootObject(可以直接)
+         "root": "kim.nzxy.demo.DemoRoot"
+      }
+   }
+}
+```

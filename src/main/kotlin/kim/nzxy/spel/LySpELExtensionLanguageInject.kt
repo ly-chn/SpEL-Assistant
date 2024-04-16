@@ -19,7 +19,8 @@ class LySpELExtensionLanguageInject : LanguageInjectionContributor {
 
         val service = SpELConfigService.getInstance()
         val path = service.getFieldPath(context) ?: return null
-        if (service.hasSpELInfo(context.project, "${path.first}@${path.second}")) {
+        val spELInfo = service.getSpELInfo(context.project, "${path.first}@${path.second}") ?: return null
+        if (LyUtil.isEmpty(spELInfo.prefix) && LyUtil.isEmpty(spELInfo.suffix)) {
             return injection
         }
         return null

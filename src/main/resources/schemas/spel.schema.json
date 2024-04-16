@@ -71,5 +71,15 @@
       }
     }
   },
+  "properties": {
+    "prefix": {
+      "type": "string",
+      "description": "Defines SpEL template prefix"
+    },
+    "suffix": {
+      "type": "string",
+      "description": "Defines SpEL template suffix"
+    }
+  },
   "additionalProperties": false
 }
