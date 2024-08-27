@@ -1,32 +1,30 @@
-package kim.nzxy.spel.json
+package kim.nzxy.spel.service
 
 import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.components.Service
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.util.ModificationTracker
-import com.intellij.psi.JavaPsiFacade
-import com.intellij.psi.PsiClass
+import com.intellij.psi.*
 import com.intellij.psi.search.GlobalSearchScope
 import com.intellij.psi.search.ProjectScope
 import com.intellij.psi.search.searches.ClassInheritorsSearch
 import com.intellij.psi.util.CachedValueProvider
 import com.intellij.psi.util.CachedValuesManager
+import com.intellij.psi.util.PsiModificationTracker
 import com.intellij.psi.util.PsiTypesUtil
+import com.intellij.uast.UastMetaLanguage
+import kim.nzxy.spel.json.ConfigJsonUtil
+import java.util.concurrent.atomic.AtomicLong
 
 
-@Service
-class JsonSuggestionService {
+@Service(Service.Level.PROJECT)
+class JsonSuggestionService(private val project: Project) {
+    private val uastChangeTracker: List<ModificationTracker> = UastMetaLanguage.getRegisteredLanguages().map {
+        PsiModificationTracker.SERVICE.getInstance(project).forLanguage(it)
+    }
+
     private val ignoredQualifiedPrefix =
         arrayOf("jdk.", "java.", "javax.", "jakarta.", "lombok.", "org.springframework", "kotlin.")
-
-    // todo: for library and source tracker
-    private val regularTracking = ModificationTracker { System.currentTimeMillis() / 10000 }
-
-    companion object {
-        fun getInstance(): JsonSuggestionService {
-            return ApplicationManager.getApplication().getService(JsonSuggestionService::class.java)
-        }
-    }
 
     private fun getAnnoFields(scope: GlobalSearchScope): Set<String> {
         val res = HashSet<String>()
@@ -45,19 +43,13 @@ class JsonSuggestionService {
         return res
     }
 
-    fun getAllMetaConfigKeys(project: Project): HashSet<String> {
-        val sourceAnnoFields = CachedValuesManager.getManager(project).getCachedValue(project) {
+    fun getAllMetaConfigKeys(): Set<String> {
+        val keys = CachedValuesManager.getManager(project).getCachedValue(project) {
             val scope = GlobalSearchScope.projectScope(project)
-            return@getCachedValue CachedValueProvider.Result.create(getAnnoFields(scope), regularTracking)
+            scope.union(ProjectScope.getLibrariesScope(project))
+            return@getCachedValue CachedValueProvider.Result.create(getAnnoFields(scope), uastChangeTracker)
         }
-        val libraryAnnoFields = CachedValuesManager.getManager(project).getCachedValue(project) {
-            val scope = ProjectScope.getLibrariesScope(project)
-            return@getCachedValue CachedValueProvider.Result.create(getAnnoFields(scope), regularTracking)
-        }
-        val keys = HashSet<String>()
-        keys.addAll(sourceAnnoFields)
-        keys.addAll(libraryAnnoFields)
-        return keys
+        return keys ?: emptySet()
     }
 
     private fun getCls(project: Project, name: String): PsiClass {

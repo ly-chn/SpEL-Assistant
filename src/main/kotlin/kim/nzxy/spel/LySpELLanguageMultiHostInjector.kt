@@ -35,8 +35,6 @@ class LySpELLanguageMultiHostInjector : MultiHostInjector {
                 break
             }
             registrar.addPlace(null, null, context as PsiLanguageInjectionHost, TextRange(start + prefix.length, end))
-            println(context.text)
-            println(context.textRange)
             index = end + suffix.length
         }
         registrar.doneInjecting()

@@ -1,7 +1,5 @@
 package kim.nzxy.spel.service
 
-import com.intellij.notification.NotificationGroupManager
-import com.intellij.notification.NotificationType
 import com.intellij.openapi.components.Service
 import com.intellij.openapi.components.service
 import com.intellij.openapi.fileEditor.impl.LoadTextUtil
@@ -39,7 +37,7 @@ class SpELJsonConfigService(private val project: Project) : ModificationTracker 
         private val fieldNameRegex = Regex("^[a-zA-Z_]\\w*$")
     }
 
-    private val myAnyChangeCount = AtomicLong(0)
+    private val changeTimes = AtomicLong(0)
 
     init {
         PsiManager.getInstance(project)
@@ -48,13 +46,13 @@ class SpELJsonConfigService(private val project: Project) : ModificationTracker 
                     if (file != null) {
                         val filename = file.viewProvider.virtualFile.name
                         ConfigJsonUtil.isSpELFilename(filename) || return
-                        myAnyChangeCount.incrementAndGet()
+                        changeTimes.incrementAndGet()
                     }
                 }
             }, project)
     }
 
-    override fun getModificationCount() = myAnyChangeCount.get()
+    override fun getModificationCount() = changeTimes.get()
 
 
     fun getSpELInfo(fieldPath: String): SpELInfo? {

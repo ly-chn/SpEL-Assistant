@@ -6,8 +6,10 @@ import com.intellij.codeInspection.ProblemsHolder
 import com.intellij.json.psi.JsonElementVisitor
 import com.intellij.json.psi.JsonFile
 import com.intellij.json.psi.JsonObject
+import com.intellij.openapi.components.service
 import com.intellij.psi.PsiElement
 import com.intellij.psi.PsiElementVisitor
+import kim.nzxy.spel.service.JsonSuggestionService
 
 /**
  * @author ly-chn
@@ -31,8 +33,8 @@ class SpELJsonKeyInspection : LocalInspectionTool() {
     }
 
     private fun visitKeys(keys: HashMap<String, PsiElement>, holder: ProblemsHolder) {
-        val service = JsonSuggestionService.getInstance()
-        val enabledKeys = service.getAllMetaConfigKeys(holder.project)
+        val service = holder.project.service<JsonSuggestionService>()
+        val enabledKeys = service.getAllMetaConfigKeys()
         keys.forEach { (k, v) ->
             if (!enabledKeys.contains(k)) {
                 // todo: msg bundle
