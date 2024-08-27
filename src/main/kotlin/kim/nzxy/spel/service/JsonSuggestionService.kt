@@ -1,5 +1,6 @@
 package kim.nzxy.spel.service
 
+import com.intellij.lang.java.JavaLanguage
 import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.components.Service
 import com.intellij.openapi.project.Project
@@ -14,13 +15,14 @@ import com.intellij.psi.util.PsiModificationTracker
 import com.intellij.psi.util.PsiTypesUtil
 import com.intellij.uast.UastMetaLanguage
 import kim.nzxy.spel.json.ConfigJsonUtil
+import org.jetbrains.kotlin.idea.KotlinLanguage
 import java.util.concurrent.atomic.AtomicLong
 
 
 @Service(Service.Level.PROJECT)
 class JsonSuggestionService(private val project: Project) {
-    private val uastChangeTracker: List<ModificationTracker> = UastMetaLanguage.getRegisteredLanguages().map {
-        PsiModificationTracker.SERVICE.getInstance(project).forLanguage(it)
+    private val uastChangeTracker: List<ModificationTracker> = listOf(JavaLanguage.INSTANCE, KotlinLanguage.INSTANCE).map {
+        PsiModificationTracker.getInstance(project).forLanguage(it)
     }
 
     private val ignoredQualifiedPrefix =

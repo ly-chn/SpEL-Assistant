@@ -45,8 +45,9 @@ class SpELJsonConfigService(private val project: Project) : ModificationTracker 
                 override fun onChange(file: PsiFile?) {
                     if (file != null) {
                         val filename = file.viewProvider.virtualFile.name
-                        ConfigJsonUtil.isSpELFilename(filename) || return
-                        changeTimes.incrementAndGet()
+                        if (ConfigJsonUtil.isSpELFilename(filename)) {
+                            changeTimes.incrementAndGet()
+                        }
                     }
                 }
             }, project)

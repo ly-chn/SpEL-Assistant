@@ -52,9 +52,6 @@ object ConfigJsonUtil {
         if (text.isEmpty() || prefix.isEmpty()) {
             return false
         }
-        if (!StringUtil.charsEqualIgnoreCase(prefix[0], text[0])) {
-            return false
-        }
         var index = 0
         for (element in prefix) {
             val found = text.indexOf(element, index)

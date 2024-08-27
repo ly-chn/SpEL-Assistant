@@ -55,7 +55,6 @@ class SpELJsonCompletionContributor : CompletionContributor() {
         text = StringUtil.unquoteString(text)
         for (configKey in configKeys) {
             if (!existedKeys.contains(configKey) && ConfigJsonUtil.relaxMatch(text, configKey)) {
-                // todo: filter current configKey
                 result.addElement(LookupElementBuilder.create(configKey).withInsertHandler(SpELInsertHandler))
             }
         }
