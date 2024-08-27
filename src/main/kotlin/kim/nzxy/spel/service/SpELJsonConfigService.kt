@@ -1,59 +1,70 @@
-package kim.nzxy.spel
+package kim.nzxy.spel.service
 
-import com.intellij.openapi.application.ApplicationManager
+import com.intellij.notification.NotificationGroupManager
+import com.intellij.notification.NotificationType
 import com.intellij.openapi.components.Service
+import com.intellij.openapi.components.service
 import com.intellij.openapi.fileEditor.impl.LoadTextUtil
 import com.intellij.openapi.module.ModuleManager
 import com.intellij.openapi.project.DumbService
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.roots.ModuleRootManager
 import com.intellij.openapi.roots.ProjectRootManager
+import com.intellij.openapi.util.ModificationTracker
 import com.intellij.openapi.vfs.VirtualFile
-import com.intellij.psi.JavaPsiFacade
-import com.intellij.psi.PsiElement
-import com.intellij.psi.PsiNameValuePair
-import com.intellij.psi.PsiType
+import com.intellij.psi.*
 import com.intellij.psi.search.FilenameIndex
 import com.intellij.psi.search.ProjectScope
 import com.intellij.psi.util.CachedValueProvider
 import com.intellij.psi.util.CachedValuesManager
-import com.intellij.psi.util.PsiModificationTracker
 import com.intellij.psi.util.PsiTreeUtil
-import com.intellij.util.SmartList
 import com.intellij.util.containers.ConcurrentFactoryMap
+import kim.nzxy.spel.PluginChecker
+import kim.nzxy.spel.SpELConst
 import kim.nzxy.spel.json.ConfigJsonUtil
 import kim.nzxy.spel.json.SpELInfo
 import org.jetbrains.kotlin.idea.core.util.toPsiFile
 import org.jetbrains.kotlin.psi.KtValueArgument
 import org.jetbrains.uast.getContainingAnnotationEntry
 import org.jetbrains.uast.toUElement
+import java.util.concurrent.atomic.AtomicLong
 
 /**
  * @author ly-chn
- * @since 2024/1/4 10:07
+ * @since 2024-08-27
  */
-@Service
-class SpELConfigService {
+@Service(Service.Level.PROJECT)
+class SpELJsonConfigService(private val project: Project) : ModificationTracker {
     companion object {
         private val fieldNameRegex = Regex("^[a-zA-Z_]\\w*$")
-        fun getInstance(): SpELConfigService {
-            return ApplicationManager.getApplication().getService(SpELConfigService::class.java)
-        }
     }
 
-    fun getSpELInfo(project: Project, fieldPath: String): SpELInfo? {
-        return getLocalMetaConfigKeys(project)[fieldPath] ?: getLibrariesConfigKeys(project)[fieldPath]
+    private val myAnyChangeCount = AtomicLong(0)
+
+    init {
+        PsiManager.getInstance(project)
+            .addPsiTreeChangeListener(object : PsiTreeAnyChangeAbstractAdapter() {
+                override fun onChange(file: PsiFile?) {
+                    if (file != null) {
+                        val filename = file.viewProvider.virtualFile.name
+                        ConfigJsonUtil.isSpELFilename(filename) || return
+                        myAnyChangeCount.incrementAndGet()
+                    }
+                }
+            }, project)
     }
 
-    fun hasSpELInfo(project: Project, fieldPath: String): Boolean {
-        return getLibrariesConfigKeys(project).containsKey(fieldPath)
-                || getLocalMetaConfigKeys(project).containsKey(fieldPath)
+    override fun getModificationCount() = myAnyChangeCount.get()
+
+
+    fun getSpELInfo(fieldPath: String): SpELInfo? {
+        return getLocalMetaConfigKeys()[fieldPath] ?: getLibrariesConfigKeys()[fieldPath]
     }
 
-    fun findPsiType(project: Project, className: String): PsiType? {
+    fun findPsiType(className: String): PsiType? {
         val cache: Map<String, PsiType?> = CachedValuesManager.getManager(project).getCachedValue(project) {
             val map: Map<String, PsiType?> = ConcurrentFactoryMap.createMap { key: String ->
-                DumbService.getInstance(project).runReadActionInSmartMode<PsiType?> {
+                project.service<DumbService>().runReadActionInSmartMode<PsiType?> {
                     JavaPsiFacade.getElementFactory(project).createTypeFromText(key, null)
                 }
             }
@@ -84,52 +95,48 @@ class SpELConfigService {
         }
     }
 
-    private fun getLocalMetaConfigKeys(project: Project): HashMap<String, SpELInfo> {
+    private fun getLocalMetaConfigKeys(): HashMap<String, SpELInfo> {
         return CachedValuesManager.getManager(project).getCachedValue(project) {
-            val dependencies = SmartList<Any>(PsiModificationTracker.MODIFICATION_COUNT)
             val allKeys = HashMap<String, SpELInfo>()
             for (module in ModuleManager.getInstance(project).modules) {
                 for (sourceRoot in ModuleRootManager.getInstance(module).sourceRoots) {
                     sourceRoot.findFileByRelativePath(ConfigJsonUtil.FILENAME)?.let {
-                        dependencies.add(it)
-                        parseConfig(project, it, allKeys)
+                        parseConfig(it, allKeys)
                     }
                 }
             }
-            return@getCachedValue CachedValueProvider.Result.create(
-                allKeys, dependencies
-            )
+            return@getCachedValue CachedValueProvider.Result.create(allKeys, this)
         }
     }
 
-    private fun parseConfig(project: Project, file: VirtualFile, collector: HashMap<String, SpELInfo>) {
+    private fun parseConfig(file: VirtualFile, collector: HashMap<String, SpELInfo>) {
         val text = LoadTextUtil.loadText(file)
         val info = ConfigJsonUtil.parseSpELInfo(text) ?: return
         info.forEach { (_, v) ->
             if (!isValidFieldName(v.method?.resultName)) {
                 v.method?.resultName = SpELConst.methodResultNameDefault
             }
-            v.fields?.entries?.removeIf{!isValidFieldName(it.key)}
+            v.fields?.entries?.removeIf { !isValidFieldName(it.key) }
             v.method?.parametersPrefix?.removeIf { !isValidFieldName(it) }
             v.sourceFile = file.toPsiFile(project)
         }
         collector.putAll(info)
     }
 
-    private fun getLibrariesConfigKeys(project: Project): HashMap<String, SpELInfo> {
+    private fun getLibrariesConfigKeys(): HashMap<String, SpELInfo> {
         return CachedValuesManager.getManager(project).getCachedValue(project) {
-            val metaInfConfigFiles = findConfigFiles(project)
+            val metaInfConfigFiles = findConfigFiles()
             val allKeys = HashMap<String, SpELInfo>()
             for (file in metaInfConfigFiles) {
-                parseConfig(project, file, allKeys)
+                parseConfig(file, allKeys)
             }
             CachedValueProvider.Result.create(
-                allKeys, PsiModificationTracker.MODIFICATION_COUNT
+                allKeys, this
             )
         }
     }
 
-    private fun findConfigFiles(project: Project): List<VirtualFile> {
+    private fun findConfigFiles(): List<VirtualFile> {
         return FilenameIndex.getVirtualFilesByName(ConfigJsonUtil.FILENAME, ProjectScope.getLibrariesScope(project))
             .filter { !it.path.contains("-sources.jar!") }
     }

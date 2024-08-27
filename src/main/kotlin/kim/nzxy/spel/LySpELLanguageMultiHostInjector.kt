@@ -2,19 +2,21 @@ package kim.nzxy.spel
 
 import com.intellij.lang.injection.MultiHostInjector
 import com.intellij.lang.injection.MultiHostRegistrar
+import com.intellij.openapi.components.service
 import com.intellij.openapi.util.TextRange
 import com.intellij.psi.PsiElement
 import com.intellij.psi.PsiLanguageInjectionHost
 import com.intellij.psi.PsiLiteralExpression
 import com.intellij.spring.el.SpringELLanguage
+import kim.nzxy.spel.service.SpELJsonConfigService
 import org.jetbrains.kotlin.psi.KtStringTemplateExpression
 
 
 class LySpELLanguageMultiHostInjector : MultiHostInjector {
     override fun getLanguagesToInject(registrar: MultiHostRegistrar, context: PsiElement) {
-        val service = SpELConfigService.getInstance()
+        val service = context.project.service<SpELJsonConfigService>()
         val path = service.getFieldPath(context) ?: return
-        val spELInfo = service.getSpELInfo(context.project, "${path.first}@${path.second}") ?: return
+        val spELInfo = service.getSpELInfo("${path.first}@${path.second}") ?: return
         if (LyUtil.isEmpty(spELInfo.prefix) || LyUtil.isEmpty(spELInfo.suffix)) {
             return
         }

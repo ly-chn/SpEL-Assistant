@@ -3,9 +3,11 @@ package kim.nzxy.spel
 import com.intellij.lang.injection.general.Injection
 import com.intellij.lang.injection.general.LanguageInjectionContributor
 import com.intellij.lang.injection.general.SimpleInjection
+import com.intellij.openapi.components.service
 import com.intellij.psi.PsiElement
 import com.intellij.psi.PsiLiteralExpression
 import com.intellij.spring.el.SpringELLanguage
+import kim.nzxy.spel.service.SpELJsonConfigService
 import org.jetbrains.kotlin.psi.KtStringTemplateExpression
 
 class LySpELExtensionLanguageInject : LanguageInjectionContributor {
@@ -17,9 +19,9 @@ class LySpELExtensionLanguageInject : LanguageInjectionContributor {
             }
         }
 
-        val service = SpELConfigService.getInstance()
+        val service = context.project.service<SpELJsonConfigService>()
         val path = service.getFieldPath(context) ?: return null
-        val spELInfo = service.getSpELInfo(context.project, "${path.first}@${path.second}") ?: return null
+        val spELInfo = service.getSpELInfo("${path.first}@${path.second}") ?: return null
         if (LyUtil.isEmpty(spELInfo.prefix) && LyUtil.isEmpty(spELInfo.suffix)) {
             return injection
         }
