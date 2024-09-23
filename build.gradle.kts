@@ -1,34 +1,43 @@
 plugins {
     id("java")
-    id("org.jetbrains.kotlin.jvm") version "1.9.0"
-    id("org.jetbrains.intellij") version "1.15.0"
+    alias(libs.plugins.kotlin)
+    alias(libs.plugins.intelliJPlatform)
 }
 
 group = "kim.nzxy"
 version = "1.2.0"
 
+kotlin {
+    jvmToolchain(17)
+}
+
 tasks {
-    buildSearchableOptions{
+    buildSearchableOptions {
         enabled = false
     }
     compileJava {
         options.encoding = "UTF-8"
     }
-    compileTestJava{
+    compileTestJava {
         options.encoding = "UTF-8"
     }
 }
 
 repositories {
     mavenCentral()
+
+    intellijPlatform {
+        defaultRepositories()
+        releases()
+        marketplace()
+    }
 }
 
-intellij {
-    version.set("2022.3")
-    type.set("IU") // Target IDE Platform
-
-    plugins.set(
-        listOf(
+dependencies {
+    intellijPlatform {
+        intellijIdeaUltimate("2024.2.1")
+        instrumentationTools()
+        bundledPlugins(
             "com.intellij.javaee.el",
             "com.intellij.spring.mvc",
             "org.intellij.intelliLang",
@@ -36,22 +45,19 @@ intellij {
             "org.jetbrains.kotlin",
             "JavaScript"
         )
-    )
+    }
+}
+
+intellijPlatform {
+    pluginConfiguration {
+        ideaVersion {
+            sinceBuild = "242"
+            untilBuild = "252.*"
+        }
+    }
 }
 
 tasks {
-    withType<JavaCompile> {
-        sourceCompatibility = "17"
-        targetCompatibility = "17"
-    }
-    withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {
-        kotlinOptions.jvmTarget = "17"
-    }
-
-    patchPluginXml {
-        sinceBuild.set("223")
-        untilBuild.set("252.*")
-    }
 
     signPlugin {
         certificateChain.set(System.getenv("CERTIFICATE_CHAIN"))

@@ -2,13 +2,13 @@ package kim.nzxy.spel.service
 
 import com.intellij.openapi.components.Service
 import com.intellij.openapi.components.service
-import com.intellij.openapi.fileEditor.impl.LoadTextUtil
 import com.intellij.openapi.module.ModuleManager
 import com.intellij.openapi.project.DumbService
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.roots.ModuleRootManager
 import com.intellij.openapi.roots.ProjectRootManager
 import com.intellij.openapi.util.ModificationTracker
+import com.intellij.openapi.vfs.VfsUtil
 import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.psi.*
 import com.intellij.psi.search.FilenameIndex
@@ -109,15 +109,17 @@ class SpELJsonConfigService(private val project: Project) : ModificationTracker 
     }
 
     private fun parseConfig(file: VirtualFile, collector: HashMap<String, SpELInfo>) {
-        val text = LoadTextUtil.loadText(file)
+        val text = VfsUtil.loadText(file)
+        file.refresh(false, false)
         val info = ConfigJsonUtil.parseSpELInfo(text) ?: return
+        val psiFile = file.toPsiFile(project)
         info.forEach { (_, v) ->
             if (!isValidFieldName(v.method?.resultName)) {
                 v.method?.resultName = SpELConst.methodResultNameDefault
             }
             v.fields?.entries?.removeIf { !isValidFieldName(it.key) }
             v.method?.parametersPrefix?.removeIf { !isValidFieldName(it) }
-            v.sourceFile = file.toPsiFile(project)
+            v.sourceFile = psiFile
         }
         collector.putAll(info)
     }
