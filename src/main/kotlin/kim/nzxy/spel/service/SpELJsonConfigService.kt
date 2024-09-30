@@ -8,7 +8,6 @@ import com.intellij.openapi.project.Project
 import com.intellij.openapi.roots.ModuleRootManager
 import com.intellij.openapi.roots.ProjectRootManager
 import com.intellij.openapi.util.ModificationTracker
-import com.intellij.openapi.vfs.VfsUtil
 import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.psi.*
 import com.intellij.psi.search.FilenameIndex
@@ -108,21 +107,6 @@ class SpELJsonConfigService(private val project: Project) : ModificationTracker 
         }
     }
 
-    private fun parseConfig(file: VirtualFile, collector: HashMap<String, SpELInfo>) {
-        val text = VfsUtil.loadText(file)
-        file.refresh(false, false)
-        val info = ConfigJsonUtil.parseSpELInfo(text) ?: return
-        val psiFile = file.toPsiFile(project)
-        info.forEach { (_, v) ->
-            if (!isValidFieldName(v.method?.resultName)) {
-                v.method?.resultName = SpELConst.methodResultNameDefault
-            }
-            v.fields?.entries?.removeIf { !isValidFieldName(it.key) }
-            v.method?.parametersPrefix?.removeIf { !isValidFieldName(it) }
-            v.sourceFile = psiFile
-        }
-        collector.putAll(info)
-    }
 
     private fun getLibrariesConfigKeys(): HashMap<String, SpELInfo> {
         return CachedValuesManager.getManager(project).getCachedValue(project) {
@@ -135,6 +119,22 @@ class SpELJsonConfigService(private val project: Project) : ModificationTracker 
                 allKeys, this
             )
         }
+    }
+
+
+    private fun parseConfig(file: VirtualFile, collector: HashMap<String, SpELInfo>) {
+        val psiFile = file.toPsiFile(project) ?: return
+        val text = psiFile.text
+        val info = ConfigJsonUtil.parseSpELInfo(text) ?: return
+        info.forEach { (_, v) ->
+            if (!isValidFieldName(v.method?.resultName)) {
+                v.method?.resultName = SpELConst.methodResultNameDefault
+            }
+            v.fields?.entries?.removeIf { !isValidFieldName(it.key) }
+            v.method?.parametersPrefix?.removeIf { !isValidFieldName(it) }
+            v.sourceFile = psiFile
+        }
+        collector.putAll(info)
     }
 
     private fun findConfigFiles(): List<VirtualFile> {
