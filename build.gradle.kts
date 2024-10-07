@@ -45,6 +45,7 @@ dependencies {
             "org.jetbrains.kotlin",
             "JavaScript"
         )
+        pluginVerifier()
     }
 }
 
@@ -53,6 +54,12 @@ intellijPlatform {
         ideaVersion {
             sinceBuild = "242"
             untilBuild = "252.*"
+        }
+    }
+
+    pluginVerification {
+        ides {
+            recommended()
         }
     }
 }
