@@ -35,7 +35,7 @@ repositories {
 
 dependencies {
     intellijPlatform {
-        intellijIdeaUltimate("2024.2.1")
+        intellijIdeaUltimate("2022.3.3")
         instrumentationTools()
         bundledPlugins(
             "com.intellij.javaee.el",
@@ -52,8 +52,8 @@ dependencies {
 intellijPlatform {
     pluginConfiguration {
         ideaVersion {
-            sinceBuild = "242"
-            untilBuild = "252.*"
+            sinceBuild = "223"
+            untilBuild = "242.*"
         }
     }
 
