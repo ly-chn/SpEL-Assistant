@@ -9,6 +9,7 @@ import com.intellij.psi.PsiLanguageInjectionHost
 import com.intellij.psi.PsiLiteralExpression
 import com.intellij.spring.el.SpringELLanguage
 import kim.nzxy.spel.service.SpELJsonConfigService
+import org.jetbrains.kotlin.ir.backend.js.utils.toJsIdentifier
 import org.jetbrains.kotlin.psi.KtStringTemplateExpression
 
 
@@ -20,10 +21,13 @@ class LySpELLanguageMultiHostInjector : MultiHostInjector {
         if (LyUtil.isEmpty(spELInfo.prefix) || LyUtil.isEmpty(spELInfo.suffix)) {
             return
         }
-        registrar.startInjecting(SpringELLanguage.INSTANCE)
         val text = context.text
         val prefix = spELInfo.prefix!!
         val suffix = spELInfo.suffix!!
+        if (text.length < prefix.length + suffix.length) {
+            return
+        }
+        registrar.startInjecting(SpringELLanguage.INSTANCE)
         var index = 0
         while (true) {
             val start = text.indexOf(prefix, index)
