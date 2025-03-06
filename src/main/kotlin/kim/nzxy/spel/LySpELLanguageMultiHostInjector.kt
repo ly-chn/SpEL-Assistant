@@ -9,7 +9,6 @@ import com.intellij.psi.PsiLanguageInjectionHost
 import com.intellij.psi.PsiLiteralExpression
 import com.intellij.spring.el.SpringELLanguage
 import kim.nzxy.spel.service.SpELJsonConfigService
-import org.jetbrains.kotlin.ir.backend.js.utils.toJsIdentifier
 import org.jetbrains.kotlin.psi.KtStringTemplateExpression
 
 

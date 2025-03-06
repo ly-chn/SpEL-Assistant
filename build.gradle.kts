@@ -5,7 +5,7 @@ plugins {
 }
 
 group = "kim.nzxy"
-version = "1.2.1"
+version = "1.3.0"
 
 kotlin {
     jvmToolchain(17)
@@ -35,7 +35,7 @@ repositories {
 
 dependencies {
     intellijPlatform {
-        intellijIdeaUltimate("2024.2")
+        intellijIdeaUltimate("2024.3.4")
         instrumentationTools()
         bundledPlugins(
             "com.intellij.javaee.el",
@@ -53,7 +53,7 @@ intellijPlatform {
     pluginConfiguration {
         ideaVersion {
             sinceBuild = "223"
-            untilBuild = "242.*"
+            untilBuild = "243.*"
         }
     }
 
@@ -65,13 +65,11 @@ intellijPlatform {
 }
 
 tasks {
-
     signPlugin {
         certificateChain.set(System.getenv("CERTIFICATE_CHAIN"))
         privateKey.set(System.getenv("PRIVATE_KEY"))
         password.set(System.getenv("PRIVATE_KEY_PASSWORD"))
     }
-
     publishPlugin {
         token.set(System.getenv("PUBLISH_TOKEN"))
     }
