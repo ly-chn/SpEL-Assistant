@@ -1,5 +1,8 @@
 package kim.nzxy.spel.service
 
+import com.intellij.openapi.application.NonBlockingReadAction
+import com.intellij.openapi.application.ReadAction
+import com.intellij.openapi.application.smartReadAction
 import com.intellij.openapi.components.Service
 import com.intellij.openapi.components.service
 import com.intellij.openapi.module.ModuleManager
@@ -62,9 +65,7 @@ class SpELJsonConfigService(private val project: Project) : ModificationTracker 
     fun findPsiType(className: String): PsiType? {
         val cache: Map<String, PsiType?> = CachedValuesManager.getManager(project).getCachedValue(project) {
             val map: Map<String, PsiType?> = ConcurrentFactoryMap.createMap { key: String ->
-                project.service<DumbService>().runReadActionInSmartMode<PsiType?> {
-                    JavaPsiFacade.getElementFactory(project).createTypeFromText(key, null)
-                }
+                JavaPsiFacade.getElementFactory(project).createTypeFromText(key, null)
             }
             CachedValueProvider.Result.createSingleDependency(
                 map,
