@@ -44,7 +44,7 @@ dependencies {
             "com.intellij.spring.mvc",
             "org.intellij.intelliLang"
         )
-        pluginVerifier()
+        pluginVerifier(version="1.384")
     }
 }
 
