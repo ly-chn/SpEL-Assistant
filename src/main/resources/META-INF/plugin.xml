@@ -23,12 +23,18 @@ With this optimization, Spring projects developed in Kotlin can now benefit from
 ]]></change-notes>
 
     <depends>com.intellij.modules.platform</depends>
+    <depends>org.jetbrains.kotlin</depends>
     <depends>com.intellij.modules.java</depends>
+    <depends>com.intellij.modules.json</depends>
     <depends>com.intellij.javaee.el</depends>
     <depends>com.intellij.spring.mvc</depends>
     <depends>org.intellij.intelliLang</depends>
-    <depends optional="true" config-file="json-schema-provider.xml">JavaScript</depends>
-    <depends optional="true" config-file="kotlin-support.xml">org.jetbrains.kotlin</depends>
+    <extensions defaultExtensionNs="JavaScript">
+        <JsonSchema.ProviderFactory implementation="kim.nzxy.spel.json.SpELJsonSchemaProviderFactory"/>
+    </extensions>
+    <extensions defaultExtensionNs="org.jetbrains.kotlin">
+        <supportsKotlinPluginMode supportsK2="true"/>
+    </extensions>
     <extensions defaultExtensionNs="com.intellij">
         <completion.contributor language="JSON" implementationClass="kim.nzxy.spel.json.SpELJsonCompletionContributor"/>
         <spring.el.contexts implementation="kim.nzxy.spel.LySpringElContextsExtension" order="first" id="SpEL-ly-chn"/>
