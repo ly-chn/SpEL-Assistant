@@ -5,7 +5,7 @@ plugins {
 }
 
 group = "kim.nzxy"
-version = "1.4.0"
+version = "1.4.1"
 
 kotlin {
     jvmToolchain(21)
@@ -35,7 +35,7 @@ repositories {
 
 dependencies {
     intellijPlatform {
-        intellijIdeaUltimate("251.23774.200")
+        intellijIdeaUltimate("2024.3")
         bundledPlugins(
             "com.intellij.java",
             "org.jetbrains.kotlin",
@@ -51,7 +51,7 @@ dependencies {
 intellijPlatform {
     pluginConfiguration {
         ideaVersion {
-            sinceBuild = "251"
+            sinceBuild = "243"
             untilBuild = "253.*"
         }
     }

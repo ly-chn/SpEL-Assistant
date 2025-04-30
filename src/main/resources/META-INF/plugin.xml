@@ -15,13 +15,6 @@
         </ul>
         ]]></description>
 
-    <change-notes><![CDATA[
-<h2>1.3.0</h2>
-This update primarily optimizes code completion support for Spring EL expressions in Kotlin language.
-
-With this optimization, Spring projects developed in Kotlin can now benefit from more comprehensive and intelligent code completion for Spring EL expressions
-]]></change-notes>
-
     <depends>com.intellij.modules.platform</depends>
     <depends>org.jetbrains.kotlin</depends>
     <depends>com.intellij.modules.java</depends>

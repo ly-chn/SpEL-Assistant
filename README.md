@@ -52,3 +52,8 @@
    }
 }
 ```
+
+
+### 注意事项
+
+1. 由于IDEA 2025.1起,  IDEA JSON插件相关变更, 2025.1以后的IDEA可能下载不到最新的版本, 可以从[releases](https://github.com/ly-chn/SpEL-Assistant/releases)下载最新版本手动安装

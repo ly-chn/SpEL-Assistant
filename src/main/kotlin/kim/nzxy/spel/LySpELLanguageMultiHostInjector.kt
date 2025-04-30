@@ -26,7 +26,6 @@ class LySpELLanguageMultiHostInjector : MultiHostInjector {
         if (text.length < prefix.length + suffix.length) {
             return
         }
-        registrar.startInjecting(SpringELLanguage.INSTANCE)
         var index = 0
         while (true) {
             val start = text.indexOf(prefix, index)
@@ -37,10 +36,11 @@ class LySpELLanguageMultiHostInjector : MultiHostInjector {
             if (end == -1) {
                 break
             }
+            registrar.startInjecting(SpringELLanguage.INSTANCE)
             registrar.addPlace(null, null, context as PsiLanguageInjectionHost, TextRange(start + prefix.length, end))
+            registrar.doneInjecting()
             index = end + suffix.length
         }
-        registrar.doneInjecting()
     }
 
     override fun elementsToInjectIn(): MutableList<out Class<out PsiElement>> {
