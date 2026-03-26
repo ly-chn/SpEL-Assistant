@@ -5,7 +5,7 @@ plugins {
 }
 
 group = "kim.nzxy"
-version = "1.4.1"
+version = "1.4.2"
 
 kotlin {
     jvmToolchain(21)
@@ -52,7 +52,7 @@ intellijPlatform {
     pluginConfiguration {
         ideaVersion {
             sinceBuild = "243"
-            untilBuild = "253.*"
+            untilBuild = "263.*"
         }
     }
 
