@@ -5,10 +5,10 @@ plugins {
 }
 
 group = "kim.nzxy"
-version = "1.4.2"
+version = "1.4.3"
 
 kotlin {
-    jvmToolchain(21)
+    jvmToolchain(25)
 }
 
 tasks {
@@ -35,13 +35,16 @@ repositories {
 
 dependencies {
     intellijPlatform {
-        intellijIdeaUltimate("2024.3")
+        intellijIdeaUltimate("2026.2")
         bundledPlugins(
             "com.intellij.java",
             "org.jetbrains.kotlin",
             "com.intellij.modules.json",
-            "com.intellij.javaee.el",
-            "com.intellij.spring.mvc",
+            "com.intellij.javaee.el"
+        )
+        bundledModules(
+            "intellij.spring",
+            "intellij.spring.el",
             "org.intellij.intelliLang"
         )
         pluginVerifier(version="1.384")
@@ -51,7 +54,7 @@ dependencies {
 intellijPlatform {
     pluginConfiguration {
         ideaVersion {
-            sinceBuild = "243"
+            sinceBuild = "262"
             untilBuild = "263.*"
         }
     }

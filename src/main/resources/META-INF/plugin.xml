@@ -3,7 +3,7 @@
 
     <name>SpEL Assistant</name>
 
-    <vendor email="lyun.chn@gmail.com" url="https://nzxy.kim">NzXy</vendor>
+    <vendor email="lyun.chn@gmail.com" url="https://github.com/ly-chn">ly-chn</vendor>
 
     <description><![CDATA[
         Custom SpEL variables support in your annotations.
@@ -15,13 +15,16 @@
         </ul>
         ]]></description>
 
-    <depends>com.intellij.modules.platform</depends>
-    <depends>org.jetbrains.kotlin</depends>
-    <depends>com.intellij.modules.java</depends>
-    <depends>com.intellij.modules.json</depends>
-    <depends>com.intellij.javaee.el</depends>
-    <depends>com.intellij.spring.mvc</depends>
-    <depends>org.intellij.intelliLang</depends>
+    <dependencies>
+        <plugin id="com.intellij.modules.platform"/>
+        <plugin optional="true" id="org.jetbrains.kotlin"/>
+        <plugin id="com.intellij.modules.java"/>
+        <plugin id="com.intellij.modules.json"/>
+        <plugin id="com.intellij.javaee.el"/>
+        <plugin id="org.intellij.intelliLang"/>
+        <module name="intellij.spring"/>
+        <module name="intellij.spring.el"/>
+    </dependencies>
     <extensions defaultExtensionNs="JavaScript">
         <JsonSchema.ProviderFactory implementation="kim.nzxy.spel.json.SpELJsonSchemaProviderFactory"/>
     </extensions>

@@ -12,7 +12,7 @@ import com.intellij.openapi.extensions.PluginId
 @Service
 class PluginChecker {
 
-    private val kotlinPluginId = PluginId.findId("org.jetbrains.kotlin")
+    private val kotlinPluginId = PluginId.getId("org.jetbrains.kotlin")
 
     private var kotlinPluginEnabled: Boolean? = null
 
@@ -25,7 +25,7 @@ class PluginChecker {
 
     fun kotlin(): Boolean {
         if (kotlinPluginEnabled == null) {
-            kotlinPluginEnabled = PluginManagerCore.getPlugin(kotlinPluginId)?.isEnabled == true
+            kotlinPluginEnabled = PluginManagerCore.isLoaded(kotlinPluginId)
         }
         return kotlinPluginEnabled!!
     }

@@ -44,10 +44,9 @@ class LySpELLanguageMultiHostInjector : MultiHostInjector {
     }
 
     override fun elementsToInjectIn(): MutableList<out Class<out PsiElement>> {
-        val result: MutableList<Class<out PsiElement>> = mutableListOf(PsiLiteralExpression::class.java)
-        if (PluginChecker.getInstance().kotlin()) {
-            result.add(KtStringTemplateExpression::class.java)
-        }
-        return result
+        return mutableListOf(
+            PsiLiteralExpression::class.java,
+            KtStringTemplateExpression::class.java
+        )
     }
 }

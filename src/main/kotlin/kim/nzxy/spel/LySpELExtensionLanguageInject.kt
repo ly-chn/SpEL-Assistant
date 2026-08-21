@@ -13,10 +13,8 @@ import org.jetbrains.kotlin.psi.KtStringTemplateExpression
 class LySpELExtensionLanguageInject : LanguageInjectionContributor {
     private val injection = SimpleInjection(SpringELLanguage.INSTANCE, "", "", null)
     override fun getInjection(context: PsiElement): Injection? {
-        if (context !is PsiLiteralExpression) {
-            if (!PluginChecker.getInstance().kotlin() || context !is KtStringTemplateExpression) {
-                return null
-            }
+        if (context !is PsiLiteralExpression && context !is KtStringTemplateExpression) {
+            return null
         }
 
         val service = context.project.service<SpELJsonConfigService>()
