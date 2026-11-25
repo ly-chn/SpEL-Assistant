@@ -23,7 +23,6 @@ import kim.nzxy.spel.PluginChecker
 import kim.nzxy.spel.SpELConst
 import kim.nzxy.spel.json.ConfigJsonUtil
 import kim.nzxy.spel.json.SpELInfo
-import org.jetbrains.kotlin.idea.core.util.toPsiFile
 import org.jetbrains.kotlin.psi.KtValueArgument
 import org.jetbrains.uast.getContainingAnnotationEntry
 import org.jetbrains.uast.toUElement
@@ -124,7 +123,7 @@ class SpELJsonConfigService(private val project: Project) : ModificationTracker 
 
 
     private fun parseConfig(file: VirtualFile, collector: HashMap<String, SpELInfo>) {
-        val psiFile = file.toPsiFile(project) ?: return
+        val psiFile = PsiManager.getInstance(project).findFile(file) ?: return
         val text = psiFile.text
         val info = ConfigJsonUtil.parseSpELInfo(text) ?: return
         info.forEach { (_, v) ->

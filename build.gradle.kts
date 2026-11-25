@@ -5,7 +5,7 @@ plugins {
 }
 
 group = "kim.nzxy"
-version = "1.4.3"
+version = "1.4.4"
 
 kotlin {
     jvmToolchain(25)
